@@ -158,7 +158,7 @@ rule solve_network:
 
 rule plot_network:
     input:
-        network='results/networks/solved_{model_file}_{regions}_{resarea}_l{ll}_{opts}.nc',
+        network='results/version-0.6/networks/solved_{model_file}_{regions}_{resarea}_l{ll}_{opts}.nc',
         model_file="data/model_file.xlsx",
         supply_regions='data/supply_regions/supply_regions_{regions}.shp',
         resarea = lambda w: "data/bundle/" + config['data']['resarea'][w.resarea]

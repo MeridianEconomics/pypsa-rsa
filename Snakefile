@@ -30,7 +30,7 @@ if config["enable"]["build_natura_raster"]:
 if config['enable']['build_cutout']:
     rule build_cutout:
         input:
-            regions_onshore='data/supply_regions/supply_regions_RSA.shp',
+            regions_onshore='data/bundle/supply_regions/RSA.shp',
             gwa_map = 'data/bundle/ZAF_wind-speed_100m.tif',
         output:
             "cutouts/{cutout}.nc",
@@ -56,7 +56,7 @@ if not config['hydro_inflow']['disable']:
 if config['enable']['build_topology']: 
     rule build_topology:
         input:
-            supply_regions='data/supply_regions/supply_regions_{regions}.shp',
+            supply_regions='data/bundle/supply_regions/{regions}.shp',
             population='data/bundle/South_Africa_100m_Population/ZAF15adjv4.tif',
             num_lines='data/num_lines.xlsx',
         output:
@@ -80,7 +80,7 @@ if config['enable']['build_renewable_profiles'] & ~config['enable']['use_eskom_w
     rule build_renewable_profiles:
         input:
             base_network="networks/base_{regions}.nc",
-            regions = 'resources/onshore_shapes_{regions}.geojson',
+            regions = 'resources/buses_{regions}.geojson',#'resources/onshore_shapes_{regions}.geojson',
             resarea = lambda w: "data/bundle/" + config['data']['resarea'][w.resarea],
             natura=lambda w: (
                 "resources/landuse_without_protected_conservation.tiff"
@@ -117,7 +117,7 @@ rule add_electricity:
             for tech in renewable_carriers
         },
         base_network='networks/base_{regions}.nc',
-        supply_regions='data/supply_regions/supply_regions_{regions}.shp',
+        supply_regions='data/bundle/supply_regions/{regions}.shp',
         load='data/bundle/SystemEnergy2009_13.csv',
         onwind_area='resources/area_wind_{regions}_{resarea}.csv',
         solar_area='resources/area_solar_{regions}_{resarea}.csv',
@@ -160,7 +160,7 @@ rule plot_network:
     input:
         network='results/version-0.6/networks/solved_{model_file}_{regions}_{resarea}_l{ll}_{opts}.nc',
         model_file="data/model_file.xlsx",
-        supply_regions='data/supply_regions/supply_regions_{regions}.shp',
+        supply_regions='data/bundle/supply_regions/{regions}.shp',
         resarea = lambda w: "data/bundle/" + config['data']['resarea'][w.resarea]
     output:
         only_map='results/plots/{model_file}_{regions}_{resarea}_l{ll}_{opts}_{attr}.{ext}',

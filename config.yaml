@@ -23,16 +23,16 @@ crs:
 # of scripts where the outputs are already built, these switches are useful for forced 
 # re-runs of the snakemake workflow, where you may not necessarily want to rebuild everything
 enable:
-  build_natura_raster: true # Rasters natural protection areas onto all cutout regions
+  build_natura_raster: false # Rasters natural protection areas onto all cutout regions
   build_topology: true # Base network topology
   build_cutout: false # Atlite cutout 
   use_eskom_wind_solar: false # Model defaults to Eskom hourly pu profiles for all wind and solar generators
   use_excel_wind_solar: [true,"data/wind_solar_profiles.xlsx"] # Model defaults to excel input hourly pu profiles for all wind and solar generators  
-  build_renewable_profiles: true # Enable calculation of renewable profiles
+  build_renewable_profiles: false # Enable calculation of renewable profiles
 
 # Specification of relevent years for the model
 years: 
-  simulation: [2025,2030,2040,2050] # Years to be modelled
+  simulation: [2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030,2035,2040,2045,2050] # Years to be modelled
   reference_demand_year: 2012  # should be a single year at present, could be extended in the future
   reference_weather_years: 
     # reference years used for solar PV and wind profiles - can be single or multiple years
@@ -135,7 +135,7 @@ atlite:
       y: [-35., -21]
       dx: 0.3
       dy: 0.3
-      time: ['2013', '2013']
+      time: ['2012', '2012']
     # RSA-2012-sarah:
     #  module: [sarah, era5] # in priority order
     #  x: [16, 35]
@@ -150,7 +150,7 @@ atlite:
 
 renewable:
   onwind:
-    cutout: RSA-2013-era5
+    cutout: RSA-2012-era5
     resource:
       method: wind
       turbine: NREL_ReferenceTurbine_2020ATB_4MW
@@ -175,7 +175,7 @@ renewable:
     clip_p_max_pu: 1.e-2
 
   solar:
-    cutout: RSA-2013-era5
+    cutout: RSA-2012-era5
     resource:
       method: pv
       panel: CSi

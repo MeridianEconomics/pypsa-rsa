@@ -290,18 +290,15 @@ def add_min_stable_levels(n, generators, config_min_stable):
 
 def add_partial_decommissioning(n, generators):
     # Only considered for existing conventional - partial decomissioning of capacity
-    decommission_factor = 0.5
-    for tech in generators.index:
+    p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
+    p_min_pu = get_as_dense(n, "Generator", "p_min_pu")
+    
+    for tech in generators.index: #n.generators[n.generators.p_nom_extendable==False]
         for y in n.investment_periods:
             if y >= generators.decomdate_50[tech]:
-                p_max_pu = n.generators_t.p_max_pu.get(tech, n.generators.p_max_pu[tech])
-                n.generators_t.p_max_pu[tech] = p_max_pu * decommission_factor
-
-                p_min_pu = n.generators_t.p_min_pu.get(tech, n.generators.p_min_pu[tech])
-                n.generators_t.p_min_pu[tech] = p_min_pu * decommission_factor
-    
-    n.generators_t.p_min_pu = n.generators_t.p_min_pu.fillna(0)
-
+                n.generators_t.p_max_pu.loc[y,tech] = 0.5*p_max_pu[tech]
+                n.generators_t.p_min_pu.loc[y,tech] = 0.5*p_min_pu[tech]
+    n.generators_t.p_min_pu=n.generators_t.p_min_pu.fillna(0)   
 
 
  ## Attach components

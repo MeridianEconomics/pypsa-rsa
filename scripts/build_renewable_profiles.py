@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
         #snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
         snakemake = mock_snakemake('build_renewable_profiles',technology='onwind', 
-                    **{'regions':'9-supply',
+                    **{'regions':'RSA',
                     'resarea':'redz'})
     configure_logging(snakemake)
     pgb.streams.wrap_stderr()
@@ -196,7 +196,8 @@ if __name__ == "__main__":
         "disable the corresponding renewable technology"
     )
 
-    if snakemake.config["atlite"]["apply_wind_correction"]:
+    if ((snakemake.wildcards.technology=='onwind') & 
+        (snakemake.config["atlite"]["apply_wind_correction"])):
         gwa_data = rioxarray.open_rasterio(snakemake.input.gwa_map)
         ds=gwa_data.sel(band=1, x=slice(*cutout.extent[[0,1]]), y=slice(*cutout.extent[[3,2]]))
         ds=ds.where(ds!=-999)

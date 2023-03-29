@@ -36,7 +36,8 @@ if config["enable"]["build_natura_raster"]:
 if config['enable']['build_cutout']:
     rule build_cutout:
         input:
-            regions_onshore='data/bundle/rsa_supply_regions.gpkg',
+            regions_onshore='data/bundle/supply_regions/RSA.shp',
+            gwa_map = 'data/bundle/ZAF_wind-speed_100m.tif',
         output:
             "cutouts/{cutout}.nc",
         log:
@@ -61,7 +62,7 @@ if not config['hydro_inflow']['disable']:
 if config['enable']['build_topology']: 
     rule build_topology:
         input:
-            supply_regions='data/bundle/rsa_supply_regions.gpkg',
+            supply_regions='data/bundle/supply_regions/{regions}.shp',
             population='data/bundle/South_Africa_100m_Population/ZAF15adjv4.tif',
             num_lines='data/num_lines.xlsx',
         output:
@@ -122,7 +123,7 @@ rule add_electricity:
             for tech in renewable_carriers
         },
         base_network='networks/base_{model_file}_{regions}.nc',
-        supply_regions='data/bundle/rsa_supply_regions.gpkg',
+        supply_regions='data/bundle/supply_regions/{regions}.shp',
         load='data/bundle/SystemEnergy2009_22.csv',
         #onwind_area='resources/area_wind_{regions}_{resarea}.csv',
         #solar_area='resources/area_solar_{regions}_{resarea}.csv',
@@ -166,7 +167,7 @@ rule plot_network:
     input:
         network='results/networks/solved_{model_file}_{regions}_{resarea}_l{ll}_{opts}.nc',
         model_file="model_file.xlsx",
-        supply_regions='data/bundle/rsa_supply_regions.gpkg',
+        supply_regions='data/bundle/supply_regions/{regions}.shp',
         resarea = lambda w: "data/bundle/" + config['data']['resarea'][w.resarea]
     output:
         only_map='results/plots/{model_file}_{regions}_{resarea}_l{ll}_{opts}_{attr}.{ext}',

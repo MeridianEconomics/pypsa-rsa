@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
         snakemake = mock_snakemake("build_cutout", 
-                                    cutout="RSA-2013-era5",
+                                    cutout="RSA-2012-era5",
                                     **{'regions':'9-supply'})
     configure_logging(snakemake)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     if {"x", "y", "bounds"}.isdisjoint(cutout_params):
         # Determine the bounds from bus regions with a buffer of two grid cells
-        onshore = gpd.read_file(snakemake.input.regions.onshore)
+        onshore = gpd.read_file(snakemake.input.regions_onshore, layer="1-supply")
         regions = pd.concat([onshore])
         d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
         cutout_params["bounds"] = regions.total_bounds + [-d, -d, d, d]

@@ -92,11 +92,7 @@ def check_centroid_in_region(regions,centroids):
 
 def build_topology():
     # Load supply regions and calculate population per region
-   
-    regions = gpd.read_file(snakemake.input.supply_regions,
-        layer=snakemake.wildcards.regions,
-    ).to_crs(snakemake.config["crs"]["geo_crs"]).set_index('name')[['geometry']] 
-    
+    regions = gpd.read_file(snakemake.input.supply_regions).set_index('name')[['geometry']]
     centroids = regions['geometry'].centroid #TODO check against original given warning about CRS
     centroids = check_centroid_in_region(regions,centroids)
 
@@ -164,8 +160,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             'build_topology', 
             **{
-                'model_file':'val-LC-UNC',
-                'regions':'11-supply',
+                'costs':'ambitions',
+                'regions':'27-supply',
                 'resarea':'redz',
                 'll':'copt',
                 'opts':'LC-24H',

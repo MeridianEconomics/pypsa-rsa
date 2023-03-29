@@ -77,7 +77,7 @@ def create_network():
 def load_buses_and_lines(n):
     buses = gpd.read_file(snakemake.input.buses)
     buses.set_index('name',drop=True,inplace=True)
-    if snakemake.wildcards.regions!='1-supply':
+    if snakemake.wildcards.regions!='RSA':
         lines = gpd.read_file(snakemake.input.lines,index_col=[1])
         lines = lines.drop('index',axis=1)
     else:
@@ -127,8 +127,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
                         'base_network', 
                         **{
-                            'model_file':'val-LC-UNC',
-                            'regions':'1-supply',
+                            'model_file':'validation-1',
+                            'regions':'RSA',
                             'resarea':'redz',
                             'll':'copt',
                             'opts':'LC',

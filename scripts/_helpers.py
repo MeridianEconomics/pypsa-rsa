@@ -211,15 +211,11 @@ def aggregate_capacity(n):
     for y in n.investment_periods:
         capacity.loc[carriers,y]=n.storage_units.p_nom_opt[(n.get_active_assets('StorageUnit',y))].groupby(n.storage_units.carrier).sum()
 
-    try:
-        capacity.loc['OCGT',:]+=capacity.loc['gas',:]+capacity.loc['diesel',:]
-    except:
-        capacity.loc['OCGT',:]+=capacity.loc['gas',:]
-        
+    capacity.loc['OCGT',:]+=capacity.loc['gas',:]+capacity.loc['diesel',:]
+    
     return capacity.interpolate(axis=1)
 
 def aggregate_energy(n):
-    
     def aggregate_p(n,y):
         return pd.concat(
             [

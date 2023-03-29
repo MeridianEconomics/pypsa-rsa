@@ -24,7 +24,7 @@ crs:
 enable:
   build_natura_raster: true # Rasters natural protection areas onto all cutout regions
   build_topology: true # Base network topology
-  build_cutout: false #false # Atlite cutout 
+  build_cutout: true #false # Atlite cutout 
   use_eskom_wind_solar: false # Model defaults to Eskom hourly pu profiles for all wind and solar generators
   use_excel_wind_solar: [true,"data/wind_solar_profiles.xlsx"] # Model defaults to excel input hourly pu profiles for all wind and solar generators  
   build_renewable_profiles: true #false # Enable calculation of renewable profiles
@@ -49,6 +49,8 @@ crs:
   area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
 
 
+
+
 # Specification of relevent years for the model
 years: 
   reference_demand_year: 2017  # should be a single year at present, could be extended in the future
@@ -66,7 +68,7 @@ years:
     hydro-import: [2021]
 
 electricity:
-  co2limit: 2.2e+9    # Cumulative CO2 emissions budget for all simulation years combined
+  co2limit: 2.e+9    # Cumulative CO2 emissions budget for all simulation years combined
   renewable_carriers: [solar, onwind, CSP, biomass, hydro, hydro-import] # defines renewable carriers
   generator_availability: # generator planned and unplanned outages are included based on Eskom data
     implement_availability: true
@@ -97,7 +99,7 @@ electricity:
     StorageUnit: [battery, PHS] 
 
   buses:
-    11-supply: 
+    9_10_11-supply: 
       OCGT: [GAUTENG, WESTERN CAPE, KZN, EASTERN CAPE] # Saldana Bay, Richards Bay, Coega
       CCGT: [GAUTENG, WESTERN CAPE, KZN, EASTERN CAPE]
       coal: [GAUTENG, LIMPOPO] # Johannesburg, Waterberg

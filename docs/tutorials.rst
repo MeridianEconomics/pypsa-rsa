@@ -385,4 +385,4 @@ data on protected areas along the cutout extent.
     4. Validation of `hydro <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb>`_, `solar and wind <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb>`_ potentials.
 
 
-.. include:: ./how_to_docs.rst
+    .. include:: ./how_to_docs.rst

@@ -10,7 +10,7 @@
 Tutorial
 ##########################################
 
-Before getting started with **PyPSA-ZA** it makes sense to be familiar
+Before getting started with **PyPSA-RSA** it makes sense to be familiar
 with its general modelling framework `PyPSA <https://pypsa.readthedocs.io>`__.
 
 The tutorial uses fewer computing resources than the entire model, allowing the user to explore 
@@ -23,10 +23,10 @@ If not yet completed, follow the :ref:`installation` steps first.
 
 The tutorial will cover examples on how to
 
-- configure and customise the PyPSA-ZA model and
+- configure and customise the PyPSA-RSA model and
 - step-by-step exucetion of the ``snakemake`` workflow, from network creation through solving the network to analysing the results.
 
-The ``model_file.xlsx`` and ``config.yaml`` files are utilised to customise the PyPSA-ZA model. The tutorial's configuration is contained in 
+The ``model_file.xlsx`` and ``config.yaml`` files are utilised to customise the PyPSA-RSA model. The tutorial's configuration is contained in 
 ``model_file_tutorial.xlsx`` and ``config.tutorial.yaml``. Use the configuration and model setup files ``config.yaml`` and ``model_file.xlsx`` to run the tutorial
 
 .. code:: bash
@@ -38,9 +38,9 @@ The ``model_file.xlsx`` and ``config.yaml`` files are utilised to customise the 
     This configuration is set to download a reduced data set via the rules :mod:`retrieve_databundle`,
     :mod:`retrieve_natura_raster`, :mod:`retrieve_cutout` totalling at less than 250 MB.
     The full set of data dependencies would consume 5.3 GB.
-    For more information on the data dependencies of PyPSA-ZA, continue reading :ref:`data`.
+    For more information on the data dependencies of PyPSA-RSA, continue reading :ref:`data`.
 
-How to customise PyPSA-ZA?
+How to customise PyPSA-RSA?
 =============================
 
 Model setup: model_file.xlsx
@@ -131,7 +131,7 @@ when running the model for the first time or when changing the ``regions`` tag.
    :start-at: build_topology:
    :end-before: build_cutout:
 
-PyPSA-ZA provides three methods for generating renewable resource data. The tag ``use_eskom_wind_solar`` uses the pu profiles for all wind and solar generators as obtained from Eskom. The 
+PyPSA-RSA provides three methods for generating renewable resource data. The tag ``use_eskom_wind_solar`` uses the pu profiles for all wind and solar generators as obtained from Eskom. The 
 tag ``use_excel_wind_solar`` utilises user specific hourly pu profiles provided in an excel spreadsheet. The tag ``build_renewables_profiles`` enables the model to calculate the temporal and 
 spatial availability of renewables such as wind and solar energy using historical weather data.
 
@@ -229,7 +229,7 @@ A good starting point to customize your model are settings of the default config
 How to execute different parts of the workflow?
 ===============================================
 
-Snakemake is a workflow management tool inherited by PyPSA-ZA from PyPSA-Eur.
+Snakemake is a workflow management tool inherited by PyPSA-RSA from PyPSA-Eur.
 Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.
 
 .. note::
@@ -242,7 +242,7 @@ The snakemake included in the conda environment pypsa-za can be used to execute 
 
     .../pypsa-za (pypsa-za) % snakemake < your custom rule >  
 
-Starting with essential usability features, the implemented PyPSA-ZA `Snakemake procedure <https://github.com/PyPSA/pypsa-za/blob/master/Snakefile>`_ that 
+Starting with essential usability features, the implemented PyPSA-RSA `Snakemake procedure <https://github.com/PyPSA/pypsa-za/blob/master/Snakefile>`_ that 
 allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model South Africa's energy system 
 using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options, 
 help to execute large workflows with parameter sweeps and various options.
@@ -254,10 +254,10 @@ E.g. renewable resource potentials for onshore wind in ``redz`` areas for a sing
 
     .../pypsa-earth (pypsa-earth) % snakemake -j 1 resources/profile_onwind_1-supply_redz.nc
 
-How to use PyPSA-ZA for your energy problem?
+How to use PyPSA-RSA for your energy problem?
 ===============================================
 
-PyPSA-ZA mostly relies on :ref:`input datasets <data_workflow>` specific to South Africa but can be tailored to represent any part of the world in a few steps. The following procedure is recommended.
+PyPSA-RSA mostly relies on :ref:`input datasets <data_workflow>` specific to South Africa but can be tailored to represent any part of the world in a few steps. The following procedure is recommended.
 
 1. Adjust the model configuration
 ---------------------------------
@@ -385,4 +385,4 @@ data on protected areas along the cutout extent.
     4. Validation of `hydro <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/hydro_generation_validation.ipynb>`_, `solar and wind <https://github.com/pypsa-meets-earth/documentation/blob/main/notebooks/validation/renewable_potential_validation.ipynb>`_ potentials.
 
 
-    .. include:: ./how_to_docs.rst
+.. include:: ./how_to_docs.rst

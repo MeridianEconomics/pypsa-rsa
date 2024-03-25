@@ -9,7 +9,7 @@
 Wildcards
 #########
 
-It is easy to run PyPSA-ZA for multiple scenarios using the wildcards feature of ``snakemake``.
+It is easy to run PyPSA-RSA for multiple scenarios using the wildcards feature of ``snakemake``.
 Wildcards allow to generalise a rule to produce all files that follow a regular expression pattern
 which e.g. defines one particular scenario. One can think of a wildcard as a parameter that shows
 up in the input/output file names of the ``Snakefile`` and thereby determines which rules to run,
@@ -95,7 +95,7 @@ It may hold multiple triggers separated by ``-``, i.e. ``Co2L-3H`` contains the
 The ``{regions}`` wildcard
 ==========================
 
-The PyPSA-ZA models can be narrowed to various number of nodes using the ``{regions}`` wildcard.
+The PyPSA-RSA models can be narrowed to various number of nodes using the ``{regions}`` wildcard.
 
 If ``regions=27-supply``, then the rule :mod:`build_topology` setups 27 nodes  based on the shape files. 
 If otherwise ``regions=RSA``, ``regions=9-supply``, ``regions=10-supply``, then the network is narrowed to n number of buses for the South African network. 

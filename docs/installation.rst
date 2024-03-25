@@ -10,7 +10,7 @@ Clone the Repository
 ====================
 
 
-First of all, clone the `PyPSA-ZA repository <https://github.com/PyPSA/pypsa-za>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-RSA repository <https://github.com/PyPSA/pypsa-za>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
@@ -24,7 +24,7 @@ If you do not have ``git`` installed, follow installation instructions `here <ht
 Install Python Dependencies
 ===========================
 
-PyPSA-ZA relies on a set of other Python packages to function.
+PyPSA-RSA relies on a set of other Python packages to function.
 We recommend using the package manager and environment management system ``conda`` to install them.
 Install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is a mini version of `Anaconda <https://www.anaconda.com/>`_ 
 that includes only ``conda`` and its dependencies or make sure ``conda`` is already installed on your system.
@@ -69,7 +69,7 @@ To obtain and unpack the data bundle in the data folder
 Install a Solver
 ================
 
-PyPSA passes the PyPSA-ZA network model to an external solver for performing a total annual system cost minimization with optimal power flow.
+PyPSA passes the PyPSA-RSA network model to an external solver for performing a total annual system cost minimization with optimal power flow.
 PyPSA is known to work with the free software
 
 - `Ipopt <https://coin-or.github.io/Ipopt/INSTALL.html>`_
@@ -106,7 +106,7 @@ It might be the case that you can only retrieve solutions by using a commercial 
 Set Up the Default Configuration
 ================================
 
-PyPSA-ZA has several configuration options that must be specified in a ``config.yaml`` file located in the root directory.
+PyPSA-RSA has several configuration options that must be specified in a ``config.yaml`` file located in the root directory.
 An example configuration ``config.default.yaml`` is maintained in the repository.
 More details on the configuration options are in :ref:`config`.
 

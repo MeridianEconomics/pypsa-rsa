@@ -9,14 +9,14 @@
 Data used by the model
 ##########################################
 
-This section explains in detail how PyPSA-ZA downloads and retrieves the various data types.
+This section explains in detail how PyPSA-RSA downloads and retrieves the various data types.
 
-Preparing the power grid layout and climatic inputs are two essential aspects of the energy modelling workflow. In addition, PyPSA-ZA utilises several environmental, economic, and technological datasets.
+Preparing the power grid layout and climatic inputs are two essential aspects of the energy modelling workflow. In addition, PyPSA-RSA utilises several environmental, economic, and technological datasets.
 
 1. Grid topology data
 ===================================
 
-PyPSA-ZA allows the user to select the desired spatial resolution; shape files are presently available for South Africa, the nine provinces of South Africa, the ten supply areas outlined in the Eskom TDP, and the twenty-seven Eskom supply regions.
+PyPSA-RSA allows the user to select the desired spatial resolution; shape files are presently available for South Africa, the nine provinces of South Africa, the ten supply areas outlined in the Eskom TDP, and the twenty-seven Eskom supply regions.
 These shape files may be found in `data/bundle/supply regions/regions.shp`, where `regions` represents the desired spatial resolution, such as `10-supply`.
 
 The grid topology model is constructed using the `build_topology` rule. When the rule `build_topology` is executed, the buses and lines are computed and saved as geojson files in the folders `resources/buses_{regions}.geojson` and `resources/lines_{regions}.geojson` for each region.

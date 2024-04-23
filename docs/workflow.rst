@@ -22,7 +22,7 @@ and the corresponding technology costs. The model constraints on annual new buil
 
 **2. Populate data**: data is then processed by means of specific methods to derive the
    main input data of the optimization methods, such as renewable energy production, demand, coal fleet EAF etc. 
-   Using the tool `Atlite https://github.com/PyPSA/atlite/>`_, renewable energy resource potential is translated 
+   Using the tool `Atlite <https://github.com/PyPSA/atlite/>`_, renewable energy resource potential is translated 
    into time series for either the `redz` or `corridors` when the option is enabled.
 
 **3. Create network model**: once the necessary model inputs are drawn, then the network model is developed using `PyPSA <https://github.com/PyPSA/PyPSA>`_

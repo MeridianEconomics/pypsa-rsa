@@ -31,10 +31,12 @@ crs:
 enable:
   build_natura_raster: false # Rasters natural protection areas onto all cutout regions
   build_topology: true # Base network topology
-  build_cutout: false #false # Atlite cutout 
+  build_cutout: true #false # Atlite cutout 
   use_eskom_wind_solar: false # Model defaults to Eskom hourly pu profiles for all wind and solar generators
   use_excel_wind_solar: [true,"../data/wind_solar_profiles.xlsx"] # Model defaults to excel input hourly pu profiles for all wind and solar generators  
   build_renewable_profiles: false #false # Enable calculation of renewable profiles
+
+
 
 # Specification of relevent years for the model
 years: 

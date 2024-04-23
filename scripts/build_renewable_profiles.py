@@ -168,8 +168,8 @@ if __name__ == "__main__":
         from _helpers import mock_snakemake
 
         #snakemake = mock_snakemake("build_renewable_profiles", technology="onwind")
-        snakemake = mock_snakemake('build_renewable_profiles',technology='solar', 
-                    **{'regions':'1-supply',
+        snakemake = mock_snakemake('build_renewable_profiles',technology='onwind', 
+                    **{'regions':'RSA',
                     'resarea':'redz'})
     configure_logging(snakemake)
     pgb.streams.wrap_stderr()
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     client = Client(cluster, asynchronous=True)
 
     cutout = atlite.Cutout(snakemake.input["cutout"])
-    regions = gpd.read_file(snakemake.input.regions).to_crs(snakemake.config["crs"]["geo_crs"])
+    regions = gpd.read_file(snakemake.input.regions)
     assert not regions.empty, (
         f"List of regions in {snakemake.input.regions} is empty, please "
         "disable the corresponding renewable technology"
@@ -312,5 +312,18 @@ if __name__ == "__main__":
         ]
     )
     ds.sel(time=~((ds.time.dt.month == 2) & (ds.time.dt.day == 29)))
+
+
+#    ds = ds.sel(
+#        bus=(
+#            (ds["profile"].mean("time") > config.get("min_p_max_pu", 0.0))
+#            & (ds["p_nom_max"] > config.get("min_p_nom_max", 0.0))
+#        )
+#    )
+
+#    if "clip_p_max_pu" in config:
+#        min_p_max_pu = config["clip_p_max_pu"]
+#        ds["profile"] = ds["profile"].where(ds["profile"] >= min_p_max_pu, 0)
+
 
     ds.to_netcdf(snakemake.output.profile)

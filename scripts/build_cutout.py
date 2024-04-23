@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     if {"x", "y", "bounds"}.isdisjoint(cutout_params):
         # Determine the bounds from bus regions with a buffer of two grid cells
-        onshore = gpd.read_file(snakemake.input.regions_onshore, layer="1-supply")
+        onshore = gpd.read_file(snakemake.input.regions.onshore)
         regions = pd.concat([onshore])
         d = max(cutout_params.get("dx", 0.25), cutout_params.get("dy", 0.25)) * 2
         cutout_params["bounds"] = regions.total_bounds + [-d, -d, d, d]

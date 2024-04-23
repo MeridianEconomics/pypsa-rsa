@@ -1,11 +1,11 @@
-# PyPSA-ZA2: An open Optimisation Model of the South African Power System
+# PyPSA-RSA: An open Optimisation Model of the South African Power System
 The accelerating development of open-source energy system modelling tools in recent years has now reached the point where it opens up a credible alternative approach to closed source exclusivity. An ever increasing number of studies are demonstrating that it is possible to produce analysis of a high quality using open-source energy system models, whilst building a wider participating modelling community. This builds confidence in results by enabling more effective peer review of work and therefore more effective feedback loops. It also builds a consistent stream of new talent entering the space to ensure that energy sector analytical capacity can be retained and steadily expanded.
 
-PyPSA-ZA2 is an open energy model of the South African power system that can be utilised for both operational studies and generation and transmission expansion planning studies. PyPSA-ZA2 is built upon the the open toolbox [PyPSA](https://pypsa.org/) for which [documentation is available](https://pypsa.readthedocs.io/en/latest/index.html). The model is currently under development and has been validated for the single node (`1-supply`), for more information on the capability of the model please see the associated [readthedocs](https://pypsa-za.readthedocs.io/en/latest/). 
+PyPSA-RSA is an open energy model of the South African power system that can be utilised for both operational studies and generation and transmission expansion planning studies. PyPSA-RSA is built upon the the open toolbox [PyPSA](https://pypsa.org/) for which [documentation is available](https://pypsa.readthedocs.io/en/latest/index.html). The model is currently under development and has been validated for the single node (`1-supply`), for more information on the capability of the model please see the associated [readthedocs](https://pypsa-za.readthedocs.io/en/latest/). 
 
 This model makes use of freely available and open data which encourages the open exchange of model data developments and eases the comparison of model results. It provides a full, automated software pipeline to assemble the load-flow-ready model from the original datasets, which enables easy replacement and improvement of the individual parts.
 
-PyPSA-ZA2 has been designed to conduct capacity expansion planning studies at differing spatial and temporal resolutions. 
+PyPSA-RSA has been designed to conduct capacity expansion planning studies at differing spatial and temporal resolutions. 
 Three different spatial resolutions are available in the model:
 
 - ``1-supply``: A single node for the entire South Africa.
@@ -16,10 +16,10 @@ Three different spatial resolutions are available in the model:
 
 ![27-supply](docs/img/27-supply.png)
 
-PyPSA-ZA2 can be solved for a single year, or for multiple years, with perfect foresight.
+PyPSA-RSA can be solved for a single year, or for multiple years, with perfect foresight.
 Multi-horizon capacity expansion planning is compuationally intensive, and therefore 
 the spatial resolution will typically need to be reduced to ``1-supply`` or ``11-supply``
-depending on the number of years modelled. By defualt PyPSA-ZA2 uses full chronology
+depending on the number of years modelled. By defualt PyPSA-RSA uses full chronology
 (8760h per year), but the number of snapshots can be reduced through the use of time-series 
 segmentation through the open-source [Time Series Aggregation Module]( https://github.com/FZJ-IEK3-VSA/tsam/). 
 
@@ -34,7 +34,7 @@ at the [Council for Scientific and Industrial Research (CSIR)](https://www.csir.
    
   Credits to Jonas Hörsch and Joanne Calitz who developed the original [PyPSA-ZA model](https://arxiv.org/pdf/1710.11199.pdf), 
   [Meridian Economics](http://meridianeconomics.co.za) who extended the PyPSA-ZA model.
-  PyPSA-ZA2 is relies on a number of functions from the [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur) and [PyPSA-Meets-Earth](https://github.com/pypsa-meets-earth/pypsa-earth).
+  PyPSA-RSA is relies on a number of functions from the [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur) and [PyPSA-Meets-Earth](https://github.com/pypsa-meets-earth/pypsa-earth).
 
 
 <!---

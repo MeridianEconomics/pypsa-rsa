@@ -90,7 +90,5 @@ Currently the pre-build file is calculated for South Africa using the `SAPAD` an
 
 * **eskom_pu_profiles.csv** is Eskom hourly pu profiles for all wind and solar generators in South Africa. This data is located in `data/eskom_pu_profiles.csv`
 
-* **Eskom EAF data.xlsx** is daily Energy Availability Factor of `Eskom <https://www.eskom.co.za/dataportal/>`_ plants. It is the difference between the maximum availability and all unavailabilities (PCLF, UCLF & OCLF) expressed as a percentage. This excludes renewables, IPPs and international imports. This  pre-downloaded data is placed in `data/Eskom EAF data.xlsx`
-.. is this eskom_data.xlsx?
 
 

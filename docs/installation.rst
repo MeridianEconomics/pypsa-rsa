@@ -10,14 +10,14 @@ Clone the Repository
 ====================
 
 
-First of all, clone the `PyPSA-RSA repository <https://github.com/PyPSA/pypsa-za>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-RSA repository <https://github.com/MeridianEconomics/pypsa-rsa.git>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
 .. code-block:: bash
 
     /some/other/path % cd /some/path/without/spaces
-    /some/path/without/spaces % git clone https://github.com/pypsa-za.git
+    /some/path/without/spaces % git clone https://github.com/MeridianEconomics/pypsa-rsa.git
 
 .. _deps:
 
@@ -30,14 +30,14 @@ Install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is 
 that includes only ``conda`` and its dependencies or make sure ``conda`` is already installed on your system.
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
-The python package requirements are curated in the `envs/environment.yaml <https://github.com/PyPSA/pypsa-za/blob/master/environment.yaml>`_ file.
+The python package requirements are curated in the `envs/environment.yaml <https://github.com/MeridianEconomics/pypsa-rsa/blob/master/envs/environment.yaml>`_ file.
 
 The environment can be installed and activated using
 
 .. code-block:: bash 
 
-    .../pypsa-za % conda env create -f environment.yaml
-    .../pypsa-za % conda activate pypsa-za
+    .../pypsa-rsa % conda env create -f environment.yaml
+    .../pypsa-rsa % conda activate pypsa-rsa
 
 Note that activation is local to the currently open shell!
 After opening a new terminal window, one needs to reissue the second command!
@@ -88,14 +88,14 @@ It might be the case that you can only retrieve solutions by using a commercial 
 
     .. code:: bash
 
-        conda activate pypsa-za
+        conda activate pypsa-rsa
         conda install -c conda-forge ipopt coincbc
 
     and on Windows
 
     .. code:: bash
 
-        conda activate pypsa-za
+        conda activate pypsa-rsa
         conda install -c conda-forge ipopt glpk
 
 .. warning::

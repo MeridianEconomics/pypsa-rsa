@@ -1,0 +1,186 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-GB">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PyPSA-RSA: An open Optimisation Model of the South African Power System &mdash; PyPSA-ZA  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/theme_overrides.css?v=52e7e328" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=47a5c9ec"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/translations.js?v=90965dfc"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            PyPSA-ZA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_workflow.html">Data used by the model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wildcards.html">Wildcards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="costs.html">Cost Assumptions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference (automated)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to_contribute.html">Сontribute</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">PyPSA-ZA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PyPSA-RSA: An open Optimisation Model of the South African Power System</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pypsa-rsa-an-open-optimisation-model-of-the-south-african-power-system">
+<h1>PyPSA-RSA: An open Optimisation Model of the South African Power System<a class="headerlink" href="#pypsa-rsa-an-open-optimisation-model-of-the-south-african-power-system" title="Permalink to this heading"></a></h1>
+<p>PyPSA-RSA is an open model dataset of the South African power system at three spatial resolutions namely;</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">1-supply</span></code>: A single node for the entire South Africa.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">11-supply</span></code>: 11 nodes based on the <a class="reference external" href="https://www.eskom.co.za/eskom-divisions/tx/gcca/">Eskom Generation Connection Capacity Assessment of the 2024 Transmission Network (GCCA – 2024)</a> regions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">27-supply</span></code>: 27 nodes based on Eskom 27 supply regions.</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/1-supply1.png"><img alt="1-supply" class="align-center" src="_images/1-supply1.png" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="_images/11-supply1.png"><img alt="9-supply" class="align-center" src="_images/11-supply1.png" style="width: 500px;" /></a>
+<a class="reference internal image-reference" href="_images/27-supply1.png"><img alt="27-supply" class="align-center" src="_images/27-supply1.png" style="width: 500px;" /></a>
+<p>PyPSA-RSA is a high temporal resolution multi-horizon expansion planning model for a least cost optimised transition path to
+a decarbonised power sector over the coming decades for South Africa.</p>
+<p>PyPSA-RSA makes use of freely available and open data which encourages the open exchange of model data developments and eases the comparison of model results.
+It provides a full, automated software pipeline to assemble the load-flow-ready model from the original datasets, which enables easy replacement and
+improvement of the individual parts.</p>
+<p>PyPSA-RSA is designed to be imported into the open toolbox <a class="reference external" href="https://pypsa.org/">PyPSA</a> for which <a class="reference external" href="https://pypsa.readthedocs.io/en/latest/index.html">documentation</a> is available as well.</p>
+<p>This project is currently maintained by <a class="reference external" href="https://meridianeconomics.co.za/">Meridian Economics</a>. Previous versions were developed within the Energy Centre
+at the <a class="reference external" href="https://www.csir.co.za/">Council for Scientific and Industrial Research (CSIR)</a> as part of the <a class="reference external" href="https://fias.institute/en/projects/condynet/">CoNDyNet project</a>, which is supported by the
+<a class="reference external" href="https://www.bmbf.de/bmbf/en/home/home_node.html">German Federal Ministry of Education and Research</a> under grant no. 03SF0472C.</p>
+<p>The model is currently under development and has been validated for the single node (<cite>1-supply</cite>), for more information on the capability of the moel please see the <a class="reference internal" href="release_notes.html#release-notes"><span class="std std-ref">Release Notes</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Credits to <a class="reference external" href="https://github.com/PyPSA/pypsa-eur">PyPSA-Eur</a> and <a class="reference external" href="https://github.com/pypsa-meets-earth/pypsa-earth">PyPSA-Meets-Earth</a> developers for the initial drafting of the documentation here reported and adapted where necessary</p>
+</div>
+<section id="id1">
+<h2>Documentation<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p><strong>Getting Started</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="introduction.html"><span class="doc">Introduction</span></a></p></li>
+<li><p><a class="reference internal" href="installation.html"><span class="doc">Installation</span></a></p></li>
+<li><p><a class="reference internal" href="workflow.html"><span class="doc">Workflow</span></a></p></li>
+<li><p><a class="reference internal" href="tutorials.html"><span class="doc">Tutorial</span></a></p></li>
+<li><p><a class="reference internal" href="data_workflow.html"><span class="doc">Data used by the model</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>Configuration</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="wildcards.html"><span class="doc">Wildcards</span></a></p></li>
+<li><p><a class="reference internal" href="configuration.html"><span class="doc">Configuration</span></a></p></li>
+<li><p><a class="reference internal" href="costs.html"><span class="doc">Cost Assumptions</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>API</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="api_reference.html"><span class="doc">API Reference (automated)</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+<p><strong>Help and References</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="release_notes.html"><span class="doc">Release Notes</span></a></p></li>
+<li><p><a class="reference internal" href="how_to_contribute.html"><span class="doc">Сontribute</span></a></p></li>
+</ul>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Meridian Economics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

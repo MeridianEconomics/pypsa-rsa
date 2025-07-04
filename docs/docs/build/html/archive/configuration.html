@@ -1,0 +1,977 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-GB">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration &mdash; PyPSA-ZA  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/theme_overrides.css?v=52e7e328" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=47a5c9ec"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/translations.js?v=90965dfc"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyPSA-ZA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data_workflow.html">Data used by the model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../wildcards.html">Wildcards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costs.html">Cost Assumptions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference (automated)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to_contribute.html">Сontribute</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyPSA-ZA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/archive/configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration">
+<span id="config"></span><h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h1>
+<p>PyPSA-ZA has several configuration options which are documented in this section and are collected in a <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file located in the root directory.
+Users should copy the provided default configuration (<code class="docutils literal notranslate"><span class="pre">config.default.yaml</span></code>) and amend their own modifications and assumptions in the user-specific
+configuration file (<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>); confer installation instructions at <a class="reference internal" href="../installation.html#defaultconfig"><span class="std std-ref">Set Up the Default Configuration</span></a>.</p>
+<section id="top-level-configuration">
+<span id="toplevel-cf"></span><h2>Top-level configuration<a class="headerlink" href="#top-level-configuration" title="Permalink to this heading"></a></h2>
+<p>PyPSA-ZA imports the configuration options originally developed in <a class="reference external" href="https://pypsa-eur.readthedocs.io/en/latest/index.html">PyPSA-Eur</a> and here reported and adapted.</p>
+<p>The options here described are collected in a <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file located in the root directory.
+Users should copy the provided default configuration (<code class="docutils literal notranslate"><span class="pre">config.default.yaml</span></code>) and amend
+their own modifications and assumptions in the user-specific configuration file (<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>);
+confer installation instructions at <a class="reference internal" href="../installation.html#defaultconfig"><span class="std std-ref">Set Up the Default Configuration</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Credits to PyPSA-Eur and PyPSA-meets-Earth developers for the initial drafting of the configuration documentation here reported</p>
+</div>
+</section>
+<section id="id1">
+<span id="id2"></span><h2>Top-level configuration<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+</section>
+<section id="scenario">
+<span id="id3"></span><h2><code class="docutils literal notranslate"><span class="pre">scenario</span></code><a class="headerlink" href="#scenario" title="Permalink to this heading"></a></h2>
+<p>It is common conduct to analysis of energy system optimisation models for <strong>multiple scenarios</strong> for a variety of reasons,
+e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
+investment changes as more ambitious greenhouse-gas emission reduction targets are applied.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">scenario</span></code> section is an extraordinary section of the config file
+that is strongly connected to the <a class="reference internal" href="../wildcards.html#wildcards"><span class="std std-ref">Wildcards</span></a> and is designed to
+facilitate running multiple scenarios through a single command</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>snakemake<span class="w"> </span>-j<span class="w"> </span><span class="m">1</span><span class="w"> </span>solve_all_networks
+</pre></div>
+</div>
+<p>For each wildcard, a <strong>list of values</strong> is provided. The rule <code class="docutils literal notranslate"><span class="pre">solve_all_networks</span></code> will trigger the rules for creating <code class="docutils literal notranslate"><span class="pre">results/networks/solved_{model_file}_{regions}_{resarea}_l{ll}_{opts}.nc</span></code> for <strong>all combinations</strong> of the provided wildcard values as defined by Python’s <a class="reference external" href="https://docs.python.org/2/library/itertools.html#itertools.product">itertools.product(…)</a> function that snakemake’s <a class="reference external" href="https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets">expand(…) function</a> uses.</p>
+<p>An exemplary dependency graph (starting from the simplification rules) then looks like this:</p>
+<img alt="archive/img/scenarios.png" src="archive/img/scenarios.png" />
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>resarea</p></td>
+<td><p>–</p></td>
+<td><p>cf. <a class="reference internal" href="../wildcards.html#resarea"><span class="std std-ref">The {resarea} wildcard</span></a></p></td>
+<td><p>List of <code class="docutils literal notranslate"><span class="pre">{resarea}</span></code> wildcards to run.</p></td>
+</tr>
+<tr class="row-odd"><td><p>regions</p></td>
+<td><p>–</p></td>
+<td><p>cf. <a class="reference internal" href="../wildcards.html#regions"><span class="std std-ref">The {regions} wildcard</span></a></p></td>
+<td><p>List of <code class="docutils literal notranslate"><span class="pre">{regions}</span></code> wildcards to run.</p></td>
+</tr>
+<tr class="row-even"><td><p>model_file</p></td>
+<td><p>–</p></td>
+<td><p>cf. <a class="reference internal" href="../wildcards.html#model-file"><span class="std std-ref">The {model_file} wildcard</span></a></p></td>
+<td><p>List of <code class="docutils literal notranslate"><span class="pre">{model_file}</span></code> wildcards to run.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ll</p></td>
+<td><p>–</p></td>
+<td><p>cf. <a class="reference internal" href="../wildcards.html#ll"><span class="std std-ref">The {ll} wildcard</span></a></p></td>
+<td><p>List of <code class="docutils literal notranslate"><span class="pre">{ll}</span></code> wildcards to run.</p></td>
+</tr>
+<tr class="row-even"><td><p>opts</p></td>
+<td><p>–</p></td>
+<td><p>cf. <a class="reference internal" href="../wildcards.html#opts"><span class="std std-ref">The {opts} wildcard</span></a></p></td>
+<td><p>List of <code class="docutils literal notranslate"><span class="pre">{opts}</span></code> wildcards to run.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="snapshots-now-specified-in-model-file-xlsx">
+<span id="snapshots-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">snapshots</span></code>- now specified in model_file.xlsx<a class="headerlink" href="#snapshots-now-specified-in-model-file-xlsx" title="Permalink to this heading"></a></h2>
+<p>Specifies the temporal range to build an energy system model for as arguments to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html">pandas.date_range</a></p>
+</section>
+<section id="electricity">
+<span id="electricity-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">electricity</span></code><a class="headerlink" href="#electricity" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>voltages</p></td>
+<td><p>kV</p></td>
+<td><p>Any subset of {220., 300., 380.}</p></td>
+<td><p>Voltage levels to consider</p></td>
+</tr>
+<tr class="row-odd"><td><p>gaslimit</p></td>
+<td><p>MWhth</p></td>
+<td><p>float or false</p></td>
+<td><p>Global gas usage limit</p></td>
+</tr>
+<tr class="row-even"><td><p>co2limit</p></td>
+<td><p><span class="math notranslate nohighlight">\(t_{CO_2-eq}/a\)</span></p></td>
+<td><p>float</p></td>
+<td><p>Cap on total annual system carbon dioxide emissions</p></td>
+</tr>
+<tr class="row-odd"><td><p>co2base</p></td>
+<td><p><span class="math notranslate nohighlight">\(t_{CO_2-eq}/a\)</span></p></td>
+<td><p>float</p></td>
+<td><p>Reference value of total annual system carbon dioxide emissions if relative emission reduction target is specified in <code class="docutils literal notranslate"><span class="pre">{opts}</span></code> wildcard.</p></td>
+</tr>
+<tr class="row-even"><td><p>agg_p_nom_limits</p></td>
+<td><p>file</p></td>
+<td><p>path</p></td>
+<td><p>Reference to <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file specifying per carrier generator nominal capacity constraints for individual countries if <code class="docutils literal notranslate"><span class="pre">'CCL'</span></code> is in <code class="docutils literal notranslate"><span class="pre">{opts}</span></code> wildcard. Defaults to <code class="docutils literal notranslate"><span class="pre">data/agg_p_nom_minmax.csv</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>operational_reserve</p></td>
+<td></td>
+<td></td>
+<td><p>Settings for reserve requirements following like <a class="reference external" href="https://genxproject.github.io/GenX/dev/core/#Reserves">GenX</a></p></td>
+</tr>
+<tr class="row-even"><td><p>– activate</p></td>
+<td><p>bool</p></td>
+<td><p>true or false</p></td>
+<td><p>Whether to take operational reserve requirements into account during optimisation</p></td>
+</tr>
+<tr class="row-odd"><td><p>– epsilon_load</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>share of total load</p></td>
+</tr>
+<tr class="row-even"><td><p>– epsilon_vres</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>share of total renewable supply</p></td>
+</tr>
+<tr class="row-odd"><td><p>– contingency</p></td>
+<td><p>MW</p></td>
+<td><p>float</p></td>
+<td><p>fixed reserve capacity</p></td>
+</tr>
+<tr class="row-even"><td><p>max_hours</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>– battery</p></td>
+<td><p>h</p></td>
+<td><p>float</p></td>
+<td><p>Maximum state of charge capacity of the battery in terms of hours at full output capacity <code class="docutils literal notranslate"><span class="pre">p_nom</span></code>. Cf. <a class="reference external" href="https://pypsa.readthedocs.io/en/latest/components.html#storage-unit">PyPSA documentation</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p>– H2</p></td>
+<td><p>h</p></td>
+<td><p>float</p></td>
+<td><p>Maximum state of charge capacity of the hydrogen storage in terms of hours at full output capacity <code class="docutils literal notranslate"><span class="pre">p_nom</span></code>. Cf. <a class="reference external" href="https://pypsa.readthedocs.io/en/latest/components.html#storage-unit">PyPSA documentation</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>extendable_carriers</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>– Generator</p></td>
+<td><p>–</p></td>
+<td><p>Any extendable carrier</p></td>
+<td><p>Defines existing or non-existing conventional and renewable power plants to be extendable during the optimization. Conventional generators can only be built/expanded where already existent today. If a listed conventional carrier is not included in the <code class="docutils literal notranslate"><span class="pre">conventional_carriers</span></code> list, the lower limit of the capacity expansion is set to 0.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– StorageUnit</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of {‘battery’,’H2’}</p></td>
+<td><p>Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity.</p></td>
+</tr>
+<tr class="row-even"><td><p>– Store</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of {‘battery’,’H2’}</p></td>
+<td><p>Adds extendable storage units (battery and/or hydrogen) at every node/bus after clustering without capacity limits and with zero initial capacity.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– Link</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of {‘H2 pipeline’}</p></td>
+<td><p>Adds extendable links (H2 pipelines only) at every connection where there are lines or HVDC links without capacity limits and with zero initial capacity. Hydrogen pipelines require hydrogen storage to be modelled as <code class="docutils literal notranslate"><span class="pre">Store</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>powerplants_filter</p></td>
+<td><p>–</p></td>
+<td><p>use <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html">pandas.query</a> strings here, e.g. Country not in [‘Germany’]</p></td>
+<td><p>Filter query for the default powerplant database.</p></td>
+</tr>
+<tr class="row-odd"><td><p>custom_powerplants</p></td>
+<td><p>–</p></td>
+<td><p>use <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html">pandas.query</a> strings here, e.g. Country in [‘Germany’]</p></td>
+<td><p>Filter query for the custom powerplant database.</p></td>
+</tr>
+<tr class="row-even"><td><p>conventional_carriers</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of {nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass}</p></td>
+<td><p>List of conventional power plants to include in the model from <code class="docutils literal notranslate"><span class="pre">resources/powerplants.csv</span></code>. If an included carrier is also listed in <cite>extendable_carriers</cite>, the capacity is taken as a lower bound.</p></td>
+</tr>
+<tr class="row-odd"><td><p>renewable_carriers</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of {solar, onwind, offwind-ac, offwind-dc, hydro}</p></td>
+<td><p>List of renewable generators to include in the model.</p></td>
+</tr>
+<tr class="row-even"><td><p>estimate_renewable_capacities</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>– enable</p></td>
+<td></td>
+<td><p>bool</p></td>
+<td><p>Activate routine to estimate renewable capacities</p></td>
+</tr>
+<tr class="row-even"><td><p>– from_opsd</p></td>
+<td><p>–</p></td>
+<td><p>bool</p></td>
+<td><p>Add capacities from OPSD data</p></td>
+</tr>
+<tr class="row-odd"><td><p>– year</p></td>
+<td><p>–</p></td>
+<td><p>bool</p></td>
+<td><p>Renewable capacities are based on existing capacities reported by IRENA for the specified year</p></td>
+</tr>
+<tr class="row-even"><td><p>– expansion_limit</p></td>
+<td><p>–</p></td>
+<td><p>float or false</p></td>
+<td><p>Artificially limit maximum capacities to factor * (IRENA capacities), i.e. 110% of &lt;years&gt;’s capacities =&gt; expansion_limit: 1.1 false: Use estimated renewable potentials determine by the workflow</p></td>
+</tr>
+<tr class="row-odd"><td><p>– technology_mapping</p></td>
+<td></td>
+<td></td>
+<td><p>Mapping between powerplantmatching and PyPSA-Eur technology names</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Carriers in <code class="docutils literal notranslate"><span class="pre">conventional_carriers</span></code> must not also be in <code class="docutils literal notranslate"><span class="pre">extendable_carriers</span></code>.</p>
+</div>
+</section>
+<section id="atlite">
+<span id="atlite-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">atlite</span></code><a class="headerlink" href="#atlite" title="Permalink to this heading"></a></h2>
+<p>Define and specify the <code class="docutils literal notranslate"><span class="pre">atlite.Cutout</span></code> used for calculating renewable potentials and time-series. All options except for <code class="docutils literal notranslate"><span class="pre">features</span></code> are directly used as <a class="reference external" href="https://atlite.readthedocs.io/en/latest/ref_api.html#cutout">cutout parameters</a>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>nprocesses</p></td>
+<td><p>–</p></td>
+<td><p>int</p></td>
+<td><p>Number of parallel processes in cutout preparation</p></td>
+</tr>
+<tr class="row-odd"><td><p>cutouts</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>– {name}</p></td>
+<td><p>–</p></td>
+<td><p>Convention is to name cutouts like <code class="docutils literal notranslate"><span class="pre">&lt;region&gt;-&lt;year&gt;-&lt;source&gt;</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">europe-2013-era5</span></code>).</p></td>
+<td><p>Name of the cutout netcdf file. The user may specify multiple cutouts under configuration <code class="docutils literal notranslate"><span class="pre">atlite:</span> <span class="pre">cutouts:</span></code>. Reference is used in configuration <code class="docutils literal notranslate"><span class="pre">renewable:</span> <span class="pre">{technology}:</span> <span class="pre">cutout:</span></code>. The cutout <code class="docutils literal notranslate"><span class="pre">base</span></code> may be used to automatically calculate temporal and spatial bounds of the network.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– – module</p></td>
+<td><p>–</p></td>
+<td><p>Subset of {‘era5’,’sarah’}</p></td>
+<td><p>Source of the reanalysis weather dataset (e.g. <a class="reference external" href="https://www.ecmwf.int/en/forecasts/datasets/reanalysis-datasets/era5">ERA5</a> or <a class="reference external" href="https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V002">SARAH-2</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>– – x</p></td>
+<td><p>°</p></td>
+<td><p>Float interval within [-180, 180]</p></td>
+<td><p>Range of longitudes to download weather data for. If not defined, it defaults to the spatial bounds of all bus shapes.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– – y</p></td>
+<td><p>°</p></td>
+<td><p>Float interval within [-90, 90]</p></td>
+<td><p>Range of latitudes to download weather data for. If not defined, it defaults to the spatial bounds of all bus shapes.</p></td>
+</tr>
+<tr class="row-even"><td><p>– – time</p></td>
+<td></td>
+<td><p>Time interval within [‘1979’, ‘2018’] (with valid pandas date time strings)</p></td>
+<td><p>Time span to download weather data for. If not defined, it defaults to the time interval spanned by the snapshots.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– – features</p></td>
+<td></td>
+<td><p>String or list of strings with valid cutout features (‘inlfux’, ‘wind’).</p></td>
+<td><p>When freshly building a cutout, retrieve data only for those features. If not defined, it defaults to all available features.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="renewable">
+<span id="renewable-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">renewable</span></code><a class="headerlink" href="#renewable" title="Permalink to this heading"></a></h2>
+<section id="onwind">
+<h3><code class="docutils literal notranslate"><span class="pre">onwind</span></code><a class="headerlink" href="#onwind" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cutout</p></td>
+<td><p>–</p></td>
+<td><p>Should be a folder listed in the configuration <code class="docutils literal notranslate"><span class="pre">atlite:</span> <span class="pre">cutouts:</span></code> (e.g. ‘RSA-2013-era5’) or reference an existing folder in the directory <code class="docutils literal notranslate"><span class="pre">cutouts</span></code>. Source module must be ERA5.</p></td>
+<td><p>Specifies the directory where the relevant weather data ist stored.</p></td>
+</tr>
+<tr class="row-odd"><td><p>resource</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>– method</p></td>
+<td><p>–</p></td>
+<td><p>Must be ‘wind’</p></td>
+<td><p>A superordinate technology type.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– turbine</p></td>
+<td><p>–</p></td>
+<td><p>One of turbine types included in <a class="reference external" href="https://github.com/PyPSA/atlite/tree/master/atlite/resources/windturbine">atlite</a></p></td>
+<td><p>Specifies the turbine type and its characteristic power curve.</p></td>
+</tr>
+<tr class="row-even"><td><p>capacity_per_sqkm</p></td>
+<td><p><span class="math notranslate nohighlight">\(MW/km^2\)</span></p></td>
+<td><p>float</p></td>
+<td><p>Allowable density of wind turbine placement.</p></td>
+</tr>
+<tr class="row-odd"><td><p>corine</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>– grid_codes</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of the <a class="reference external" href="http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file">CORINE Land Cover code list</a></p></td>
+<td><p>Specifies areas according to CORINE Land Cover codes which are generally eligible for wind turbine placement.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– distance</p></td>
+<td><p>m</p></td>
+<td><p>float</p></td>
+<td><p>Distance to keep from areas specified in <code class="docutils literal notranslate"><span class="pre">distance_grid_codes</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>– distance_grid_codes</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of the <a class="reference external" href="http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file">CORINE Land Cover code list</a></p></td>
+<td><p>Specifies areas according to CORINE Land Cover codes to which wind turbines must maintain a distance specified in the setting <code class="docutils literal notranslate"><span class="pre">distance</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>natura</p></td>
+<td><p>bool</p></td>
+<td><p>{true, false}</p></td>
+<td><p>Switch to exclude <a class="reference external" href="https://en.wikipedia.org/wiki/Natura_2000">Natura 2000</a> natural protection areas. Area is excluded if <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>potential</p></td>
+<td><p>–</p></td>
+<td><p>One of {‘simple’, ‘conservative’}</p></td>
+<td><p>Method to compute the maximal installable potential for a node; confer <span class="xref std std-ref">renewableprofiles</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>clip_p_max_pu</p></td>
+<td><p>p.u.</p></td>
+<td><p>float</p></td>
+<td><p>To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="solar">
+<h3><code class="docutils literal notranslate"><span class="pre">solar</span></code><a class="headerlink" href="#solar" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cutout</p></td>
+<td><p>–</p></td>
+<td><p>Should be a folder listed in the configuration <code class="docutils literal notranslate"><span class="pre">atlite:</span> <span class="pre">cutouts:</span></code> (e.g. ‘europe-2013-era5’) or reference an existing folder in the directory <code class="docutils literal notranslate"><span class="pre">cutouts</span></code>. Source module can be ERA5 or SARAH-2.</p></td>
+<td><p>Specifies the directory where the relevant weather data ist stored that is specified at <code class="docutils literal notranslate"><span class="pre">atlite/cutouts</span></code> configuration. Both <code class="docutils literal notranslate"><span class="pre">sarah</span></code> and <code class="docutils literal notranslate"><span class="pre">era5</span></code> work.</p></td>
+</tr>
+<tr class="row-odd"><td><p>resource</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>– method</p></td>
+<td><p>–</p></td>
+<td><p>Must be ‘pv’</p></td>
+<td><p>A superordinate technology type.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– panel</p></td>
+<td><p>–</p></td>
+<td><p>One of {‘Csi’, ‘CdTe’, ‘KANENA’} as defined in <a class="reference external" href="https://github.com/PyPSA/atlite/tree/master/atlite/resources/solarpanel">atlite</a></p></td>
+<td><p>Specifies the solar panel technology and its characteristic attributes.</p></td>
+</tr>
+<tr class="row-even"><td><p>– orientation</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>– – slope</p></td>
+<td><p>°</p></td>
+<td><p>Realistically any angle in [0., 90.]</p></td>
+<td><p>Specifies the tilt angle (or slope) of the solar panel. A slope of zero corresponds to the face of the panel aiming directly overhead. A positive tilt angle steers the panel towards the equator.</p></td>
+</tr>
+<tr class="row-even"><td><p>– – azimuth</p></td>
+<td><p>°</p></td>
+<td><p>Any angle in [0., 360.]</p></td>
+<td><p>Specifies the <a class="reference external" href="https://en.wikipedia.org/wiki/Azimuth">azimuth</a> orientation of the solar panel. South corresponds to 180.°.</p></td>
+</tr>
+<tr class="row-odd"><td><p>capacity_per_sqkm</p></td>
+<td><p><span class="math notranslate nohighlight">\(MW/km^2\)</span></p></td>
+<td><p>float</p></td>
+<td><p>Allowable density of solar panel placement.</p></td>
+</tr>
+<tr class="row-even"><td><p>correction_factor</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>A correction factor for the capacity factor (availability) time series.</p></td>
+</tr>
+<tr class="row-odd"><td><p>corine</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of the <a class="reference external" href="http://www.eea.europa.eu/data-and-maps/data/corine-land-cover-2006-raster-1/corine-land-cover-classes-and/clc_legend.csv/at_download/file">CORINE Land Cover code list</a></p></td>
+<td><p>Specifies areas according to CORINE Land Cover codes which are generally eligible for solar panel placement.</p></td>
+</tr>
+<tr class="row-even"><td><p>natura</p></td>
+<td><p>bool</p></td>
+<td><p>{true, false}</p></td>
+<td><p>Switch to exclude <a class="reference external" href="https://en.wikipedia.org/wiki/Natura_2000">Natura 2000</a> natural protection areas. Area is excluded if <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>potential</p></td>
+<td><p>–</p></td>
+<td><p>One of {‘simple’, ‘conservative’}</p></td>
+<td><p>Method to compute the maximal installable potential for a node; confer <span class="xref std std-ref">renewableprofiles</span></p></td>
+</tr>
+<tr class="row-even"><td><p>clip_p_max_pu</p></td>
+<td><p>p.u.</p></td>
+<td><p>float</p></td>
+<td><p>To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="hydro">
+<h3><code class="docutils literal notranslate"><span class="pre">hydro</span></code><a class="headerlink" href="#hydro" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cutout</p></td>
+<td><p>–</p></td>
+<td><p>Must be ‘RSA-2013-era5’</p></td>
+<td><p>Specifies the directory where the relevant weather data ist stored.</p></td>
+</tr>
+<tr class="row-odd"><td><p>carriers</p></td>
+<td><p>–</p></td>
+<td><p>Any subset of {‘ror’, ‘PHS’, ‘hydro’}</p></td>
+<td><p>Specifies the types of hydro power plants to build per-unit availability time series for. ‘ror’ stands for run-of-river plants, ‘PHS’ represents pumped-hydro storage, and ‘hydro’ stands for hydroelectric dams.</p></td>
+</tr>
+<tr class="row-even"><td><p>PHS_max_hours</p></td>
+<td><p>h</p></td>
+<td><p>float</p></td>
+<td><p>Maximum state of charge capacity of the pumped-hydro storage (PHS) in terms of hours at full output capacity <code class="docutils literal notranslate"><span class="pre">p_nom</span></code>. Cf. <a class="reference external" href="https://pypsa.readthedocs.io/en/latest/components.html#storage-unit">PyPSA documentation</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>hydro_max_hours</p></td>
+<td><p>h</p></td>
+<td><p>Any of {float, ‘energy_capacity_totals_by_country’, ‘estimate_by_large_installations’}</p></td>
+<td><p>Maximum state of charge capacity of the pumped-hydro storage (PHS) in terms of hours at full output capacity <code class="docutils literal notranslate"><span class="pre">p_nom</span></code> or heuristically determined. Cf. <a class="reference external" href="https://pypsa.readthedocs.io/en/latest/components.html#storage-unit">PyPSA documentation</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p>clip_min_inflow</p></td>
+<td><p>MW</p></td>
+<td><p>float</p></td>
+<td><p>To avoid too small values in the inflow time series, values below this threshold are set to zero.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="lines">
+<span id="lines-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">lines</span></code><a class="headerlink" href="#lines" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>types</p></td>
+<td><p>–</p></td>
+<td><p>Values should specify a <a class="reference external" href="https://pypsa.readthedocs.io/en/latest/components.html#line-types">line type in PyPSA</a>. Keys should specify the corresponding voltage level (e.g. 220., 300. and 380. kV)</p></td>
+<td><p>Specifies line types to assume for the different voltage levels of the ENTSO-E grid extraction. Should normally handle voltage levels 220, 300, and 380 kV</p></td>
+</tr>
+<tr class="row-odd"><td><p>s_max_pu</p></td>
+<td><p>–</p></td>
+<td><p>Value in [0.,1.]</p></td>
+<td><p>Correction factor for line capacities (<code class="docutils literal notranslate"><span class="pre">s_nom</span></code>) to approximate <span class="math notranslate nohighlight">\(N-1\)</span> security and reserve capacity for reactive power flows</p></td>
+</tr>
+<tr class="row-even"><td><p>s_nom_max</p></td>
+<td><p>MW</p></td>
+<td><p>float</p></td>
+<td><p>Global upper limit for the maximum capacity of each extendable line.</p></td>
+</tr>
+<tr class="row-odd"><td><p>length_factor</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>Correction factor to account for the fact that buses are <em>not</em> connected by lines through air-line distance.</p></td>
+</tr>
+<tr class="row-even"><td><p>under_construction</p></td>
+<td><p>–</p></td>
+<td><p>One of {‘zero’: set capacity to zero, ‘remove’: remove completely, ‘keep’: keep with full capacity}</p></td>
+<td><p>Specifies how to handle lines which are currently under construction.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="links">
+<span id="links-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">links</span></code><a class="headerlink" href="#links" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>p_max_pu</p></td>
+<td><p>–</p></td>
+<td><p>Value in [0.,1.]</p></td>
+<td><p>Correction factor for link capacities <code class="docutils literal notranslate"><span class="pre">p_nom</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>p_nom_max</p></td>
+<td><p>MW</p></td>
+<td><p>float</p></td>
+<td><p>Global upper limit for the maximum capacity of each extendable DC link.</p></td>
+</tr>
+<tr class="row-even"><td><p>include_tyndp</p></td>
+<td><p>bool</p></td>
+<td><p>{‘true’, ‘false’}</p></td>
+<td><p>Specifies whether to add HVDC link projects from the <a class="reference external" href="https://tyndp.entsoe.eu/tyndp2018/projects/">TYNDP 2018</a> which are at least in permitting.</p></td>
+</tr>
+<tr class="row-odd"><td><p>under_construction</p></td>
+<td><p>–</p></td>
+<td><p>One of {‘zero’: set capacity to zero, ‘remove’: remove completely, ‘keep’: keep with full capacity}</p></td>
+<td><p>Specifies how to handle lines which are currently under construction.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="costs">
+<span id="costs-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">costs</span></code><a class="headerlink" href="#costs" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>year</p></td>
+<td><p>–</p></td>
+<td><p>YYYY; e.g. ‘2030’</p></td>
+<td><p>Year for which to retrieve cost assumptions of <code class="docutils literal notranslate"><span class="pre">resources/costs.csv</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>version</p></td>
+<td><p>–</p></td>
+<td><p>vX.X.X; e.g. ‘v0.1.0’</p></td>
+<td><p>Version of <code class="docutils literal notranslate"><span class="pre">technology-data</span></code> repository to use.</p></td>
+</tr>
+<tr class="row-even"><td><p>rooftop_share</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>Share of rooftop PV when calculating capital cost of solar (joint rooftop and utility-scale PV).</p></td>
+</tr>
+<tr class="row-odd"><td><p>fill_values</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>Default values if not specified for a technology in <code class="docutils literal notranslate"><span class="pre">resources/costs.csv</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>capital_cost</p></td>
+<td><p>EUR/MW</p></td>
+<td><p>Keys should be in the ‘technology’ column of <code class="docutils literal notranslate"><span class="pre">resources/costs.csv</span></code>. Values can be any float.</p></td>
+<td><p>For the given technologies, assumptions about their capital investment costs are set to the corresponding value. Optional; overwrites cost assumptions from <code class="docutils literal notranslate"><span class="pre">resources/costs.csv</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>marginal_cost</p></td>
+<td><p>EUR/MWh</p></td>
+<td><p>Keys should be in the ‘technology’ column of <code class="docutils literal notranslate"><span class="pre">resources/costs.csv</span></code>. Values can be any float.</p></td>
+<td><p>For the given technologies, assumptions about their marginal operating costs are set to the corresponding value. Optional; overwrites cost assumptions from <code class="docutils literal notranslate"><span class="pre">resources/costs.csv</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>emission_prices</p></td>
+<td></td>
+<td></td>
+<td><p>Specify exogenous prices for emission types listed in <code class="docutils literal notranslate"><span class="pre">network.carriers</span></code> to marginal costs.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– co2</p></td>
+<td><p>EUR/t</p></td>
+<td><p>float</p></td>
+<td><p>Exogenous price of carbon-dioxide added to the marginal costs of fossil-fuelled generators according to their carbon intensity. Added through the keyword <code class="docutils literal notranslate"><span class="pre">Ep</span></code> in the <code class="docutils literal notranslate"><span class="pre">{opts}</span></code> wildcard only in the rule <code class="xref py py-mod docutils literal notranslate"><span class="pre">prepare_network`</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To change cost assumptions in more detail (i.e. other than <code class="docutils literal notranslate"><span class="pre">marginal_cost</span></code> and <code class="docutils literal notranslate"><span class="pre">capital_cost</span></code>), consider modifying cost assumptions directly in <code class="docutils literal notranslate"><span class="pre">data/costs.csv</span></code> as this is not yet supported through the config file.
+You can also build multiple different cost databases. Make a renamed copy of <code class="docutils literal notranslate"><span class="pre">data/costs.csv</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">data/costs-optimistic.csv</span></code>) and set the variable <code class="docutils literal notranslate"><span class="pre">COSTS=data/costs-optimistic.csv</span></code> in the <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code>.</p>
+</div>
+</section>
+<section id="solving">
+<span id="solving-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">solving</span></code><a class="headerlink" href="#solving" title="Permalink to this heading"></a></h2>
+<section id="options">
+<h3><code class="docutils literal notranslate"><span class="pre">options</span></code><a class="headerlink" href="#options" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>formulation</p></td>
+<td><p>–</p></td>
+<td><p>Any of {‘angles’, ‘kirchhoff’, ‘cycles’, ‘ptdf’}</p></td>
+<td><p>Specifies which variant of linearized power flow formulations to use in the optimisation problem. Recommended is ‘kirchhoff’. Explained in <a class="reference external" href="https://arxiv.org/abs/1704.01881">this article</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>load_shedding</p></td>
+<td><p>bool</p></td>
+<td><p>{‘true’,’false’}</p></td>
+<td><p>Add generators with a prohibitively high marginal cost to simulate load shedding and avoid problem infeasibilities.</p></td>
+</tr>
+<tr class="row-even"><td><p>noisy_costs</p></td>
+<td><p>bool</p></td>
+<td><p>{‘true’,’false’}</p></td>
+<td><p>Add random noise to marginal cost of generators by <span class="math notranslate nohighlight">\(\mathcal{U}(0.009,0,011)\)</span> and capital cost of lines and links by <span class="math notranslate nohighlight">\(\mathcal{U}(0.09,0,11)\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>min_iterations</p></td>
+<td><p>–</p></td>
+<td><p>int</p></td>
+<td><p>Minimum number of solving iterations in between which resistance and reactence (<code class="docutils literal notranslate"><span class="pre">x/r</span></code>) are updated for branches according to <code class="docutils literal notranslate"><span class="pre">s_nom_opt</span></code> of the previous run.</p></td>
+</tr>
+<tr class="row-even"><td><p>max_iterations</p></td>
+<td><p>–</p></td>
+<td><p>int</p></td>
+<td><p>Maximum number of solving iterations in between which resistance and reactence (<code class="docutils literal notranslate"><span class="pre">x/r</span></code>) are updated for branches according to <code class="docutils literal notranslate"><span class="pre">s_nom_opt</span></code> of the previous run.</p></td>
+</tr>
+<tr class="row-odd"><td><p>nhours</p></td>
+<td><p>–</p></td>
+<td><p>int</p></td>
+<td><p>Specifies the <span class="math notranslate nohighlight">\(n\)</span> first snapshots to take into account. Must be less than the total number of snapshots. Rather recommended only for debugging.</p></td>
+</tr>
+<tr class="row-even"><td><p>clip_p_max_pu</p></td>
+<td><p>p.u.</p></td>
+<td><p>float</p></td>
+<td><p>To avoid too small values in the renewables` per-unit availability time series values below this threshold are set to zero.</p></td>
+</tr>
+<tr class="row-odd"><td><p>skip_iterations</p></td>
+<td><p>bool</p></td>
+<td><p>{‘true’,’false’}</p></td>
+<td><p>Skip iterating, do not update impedances of branches.</p></td>
+</tr>
+<tr class="row-even"><td><p>track_iterations</p></td>
+<td><p>bool</p></td>
+<td><p>{‘true’,’false’}</p></td>
+<td><p>Flag whether to store the intermediate branch capacities and objective function values are recorded for each iteration in <code class="docutils literal notranslate"><span class="pre">network.lines['s_nom_opt_X']</span></code> (where <code class="docutils literal notranslate"><span class="pre">X</span></code> labels the iteration)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="solver">
+<h3><code class="docutils literal notranslate"><span class="pre">solver</span></code><a class="headerlink" href="#solver" title="Permalink to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>name</p></td>
+<td><p>–</p></td>
+<td><p>One of {‘gurobi’, ‘cplex’, ‘cbc’, ‘glpk’, ‘ipopt’}; potentially more possible</p></td>
+<td><p>Solver to use for optimisation problems in the workflow; e.g. clustering and linear optimal power flow.</p></td>
+</tr>
+<tr class="row-odd"><td><p>opts</p></td>
+<td><p>–</p></td>
+<td><p>Parameter list for <a class="reference external" href="https://www.gurobi.com/documentation/8.1/refman/parameters.html">Gurobi</a> and <a class="reference external" href="https://www.ibm.com/docs/en/icos/20.1.0?topic=cplex-topical-list-parameters">CPLEX</a></p></td>
+<td><p>Solver specific parameter settings.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="plotting">
+<span id="plotting-cf"></span><h2><code class="docutils literal notranslate"><span class="pre">plotting</span></code><a class="headerlink" href="#plotting" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 29.8%" />
+<col style="width: 8.3%" />
+<col style="width: 26.2%" />
+<col style="width: 35.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Values</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>map</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>– figsize</p></td>
+<td><p>–</p></td>
+<td><p>[width, height]; e.g. [7,7]</p></td>
+<td><p>Figure size in inches.</p></td>
+</tr>
+<tr class="row-even"><td><p>– boundaries</p></td>
+<td><p>°</p></td>
+<td><p>[x1,x2,y1,y2]</p></td>
+<td><p>Boundaries of the map plots in degrees latitude (y) and longitude (x)</p></td>
+</tr>
+<tr class="row-odd"><td><p>– p_nom</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>– – bus_size_factor</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>Factor by which values determining bus sizes are scaled to fit well in the plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p>– – linewidth_factor</p></td>
+<td><p>–</p></td>
+<td><p>float</p></td>
+<td><p>Factor by which values determining bus sizes are scaled to fit well in the plot.</p></td>
+</tr>
+<tr class="row-even"><td><p>costs_max</p></td>
+<td><p>bn Euro</p></td>
+<td><p>float</p></td>
+<td><p>Upper y-axis limit in cost bar plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p>costs_threshold</p></td>
+<td><p>bn Euro</p></td>
+<td><p>float</p></td>
+<td><p>Threshold below which technologies will not be shown in cost bar plots.</p></td>
+</tr>
+<tr class="row-even"><td><p>energy_max</p></td>
+<td><p>TWh</p></td>
+<td><p>float</p></td>
+<td><p>Upper y-axis limit in energy bar plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p>energy_min</p></td>
+<td><p>TWh</p></td>
+<td><p>float</p></td>
+<td><p>Lower y-axis limit in energy bar plots.</p></td>
+</tr>
+<tr class="row-even"><td><p>energy_threshold</p></td>
+<td><p>TWh</p></td>
+<td><p>float</p></td>
+<td><p>Threshold below which technologies will not be shown in energy bar plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p>tech_colors</p></td>
+<td><p>–</p></td>
+<td><p>carrier -&gt; HEX colour code</p></td>
+<td><p>Mapping from network <code class="docutils literal notranslate"><span class="pre">carrier</span></code> to a colour (<a class="reference external" href="https://en.wikipedia.org/wiki/Web_colors#Hex_triplet">HEX colour code</a>).</p></td>
+</tr>
+<tr class="row-even"><td><p>nice_names</p></td>
+<td><p>–</p></td>
+<td><p>str -&gt; str</p></td>
+<td><p>Mapping from network <code class="docutils literal notranslate"><span class="pre">carrier</span></code> to a more readable name.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Meridian Economics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

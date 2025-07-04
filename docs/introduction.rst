@@ -77,6 +77,7 @@ The content in this package is organized in folders as described below; for more
 - ``logs``: Stores log files about solving, including the solver output, console output and the output of a memory logger.
 - ``envs``: Stores the conda environment files to successfully run the workflow.
 
+Note that the folders: ``resources``, ``networks``, ``results``, ``benchmarks``, and ``logs`` are created by the ``snakemake`` workflow and are included in .gitignore.
 
 License
 =======
@@ -86,13 +87,13 @@ PyPSA-RSA work is released under multiple licenses:
 * All original source code is licensed as free software under `MIT License <https://github.com/PyPSA/pypsa-eur/blob/master/LICENSES/MIT.txt>`_.
 * The documentation is licensed under `CC-BY-4.0 <https://creativecommons.org/licenses/by/4.0/>`_.
 * Configuration files are mostly licensed under `CC0-1.0 <https://creativecommons.org/publicdomain/zero/1.0/>`_.
-* Data files are licensed under different licenses as noted below.
+* Data files can be found `here <https://zenodo.org/records/15790151>`_ and are licensed under different licenses as noted below.
 
-Licenses and urls of the data used in PyPSA-RSA:
+Licenses of the data used in PyPSA-RSA:
 
 .. csv-table::
    :header-rows: 1
-   :file: configtables/licenses.csv
+   :file: configtables/licenses_2025.csv
 
 
 * *BY: Attribute Source*

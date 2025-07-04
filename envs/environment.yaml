@@ -10,11 +10,11 @@ channels:
 - nrel
 
 dependencies:
-- python[version='>=3.12']
+- python=3.8
 - pip
 - mamba   # esp for windows build
 
-- pypsa>=0.30.0
+- pypsa=0.21.3
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
 - powerplantmatching[version='>=0.5.15']
@@ -32,15 +32,15 @@ dependencies:
 - pytables
 - lxml
 - numpy
-- pandas [version='>=2.1']
-- geopandas[version='>=1']
+- pandas
+- geopandas=0.11.0
 - fiona!=1.8.22
 - xarray [version='>=2023.11.0']
 - netcdf4
 - networkx
 - scipy
 - pydoe2
-- shapely[version='>=2.0']
+- shapely=1.8.5
 - pre-commit
 - pyomo
 - matplotlib

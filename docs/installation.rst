@@ -10,7 +10,7 @@ Clone the Repository
 ====================
 
 
-First of all, clone the `PyPSA-RSA repository <https://github.com/MeridianEconomics/pypsa-rsa>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-RSA repository <https://github.com/MeridianEconomics/pypsa-rsa.git>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 

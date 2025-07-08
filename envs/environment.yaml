@@ -10,14 +10,14 @@ channels:
 - nrel
 
 dependencies:
-- python=3.8
+- python[version='>=3.12']
 - pip
 - mamba   # esp for windows build
 
-- pypsa=0.21.3
+- pypsa>=0.30.0
 # - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
 - dask
-- powerplantmatching>=0.5.7
+- powerplantmatching[version='>=0.5.15']
 - earth-osm>=0.1.0
 - atlite
 - nrel-pysam
@@ -26,24 +26,24 @@ dependencies:
 - xlrd
 - openpyxl
 - seaborn
-- snakemake-minimal
+- snakemake-minimal[version='>=8.14']
 - memory_profiler
 - ruamel.yaml<=0.17.26
 - pytables
 - lxml
 - numpy
-- pandas
-- geopandas>=0.11.0
+- pandas [version='>=2.1']
+- geopandas[version='>=1']
 - fiona!=1.8.22
-- xarray
+- xarray [version='>=2023.11.0']
 - netcdf4
 - networkx
 - scipy
 - pydoe2
-- shapely>=2
+- shapely[version='>=2.0']
 - pre-commit
 - pyomo
-- matplotlib<=3.5.2
+- matplotlib
 - reverse-geocode
 - country_converter
 

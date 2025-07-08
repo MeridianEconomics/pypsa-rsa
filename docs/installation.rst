@@ -10,15 +10,14 @@ Clone the Repository
 ====================
 
 
-First of all, clone the `PyPSA-RSA repository <https://github.com/PyPSA/pypsa-za>`_ using the version control system ``git``.
+First of all, clone the `PyPSA-RSA repository <https://github.com/MeridianEconomics/pypsa-rsa>`_ using the version control system ``git``.
 The path to the directory into which the ``git repository`` is cloned, must **not** have any spaces!
 If you do not have ``git`` installed, follow installation instructions `here <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`_.
 
 .. code-block:: bash
 
     /some/other/path % cd /some/path/without/spaces
-    /some/path/without/spaces % git clone https://github.com/pypsa-za.git
-
+    /some/path/without/spaces % git clone https://github.com/MeridianEconomics/pypsa-rsa.git
 .. _deps:
 
 Install Python Dependencies
@@ -30,14 +29,14 @@ Install `miniconda <https://docs.conda.io/en/latest/miniconda.html>`_, which is 
 that includes only ``conda`` and its dependencies or make sure ``conda`` is already installed on your system.
 For instructions for your operating system follow the ``conda`` `installation guide <https://docs.conda.io/projects/conda/en/latest/user-guide/install/>`_.
 
-The python package requirements are curated in the `envs/environment.yaml <https://github.com/PyPSA/pypsa-za/blob/master/environment.yaml>`_ file.
+The python package requirements are curated in the `envs/environment.yaml <https://github.com/MeridianEconomics/pypsa-rsa/blob/master/envs/environment.yaml>`_ file.
 
-The environment can be installed and activated using
+The environment can be installed and activated using:
 
 .. code-block:: bash 
 
-    .../pypsa-za % conda env create -f environment.yaml
-    .../pypsa-za % conda activate pypsa-za
+    .../pypsa-rsa % conda env create -f environment.yaml
+    .../pypsa-rsa % conda activate pypsa-rsa
 
 Note that activation is local to the currently open shell!
 After opening a new terminal window, one needs to reissue the second command!
@@ -58,13 +57,12 @@ After opening a new terminal window, one needs to reissue the second command!
 
 Download Data Dependencies
 ==========================
-For ease of installation and reproduction we provide a bundle pypsa-za-bundle.7z with the necessary data files.
-To obtain and unpack the data bundle in the data folder
+For ease of installation and reproduction we provide a bundle with the necessary data files.
+To obtain the data
 
 .. code-block:: bash
 
-    .../data % wget "https://vfs.fias.science/d/f204668ef2/files/?dl=1&p=/pypsa-za-bundle.7z"   
-    .../data % 7z x pypsa-za-bundle.7z
+    .../data % gdown --folder \ https://drive.google.com/drive/folders/17f54zTMEfeFZhNByXxLkf9qcZRdhng03?usp=drive_link -O .   
 
 Install a Solver
 ================
@@ -83,19 +81,19 @@ It might be the case that you can only retrieve solutions by using a commercial 
 
 .. note::
     The rules :mod:`cluster_network` and :mod:`simplify_network` solve a quadratic optimisation problem for clustering.
-    The open-source solvers Cbc and GlPK cannot handle this. A fallback to Ipopt is implemented in this case, but requires
+    The open-source solvers Cbc and GLPK cannot handle this. A fallback to Ipopt is implemented in this case, but requires
     also Ipopt to be installed. For an open-source solver setup install in your ``conda`` environment on OSX/Linux
 
     .. code:: bash
 
-        conda activate pypsa-za
+        conda activate pypsa-rsa
         conda install -c conda-forge ipopt coincbc
 
     and on Windows
 
     .. code:: bash
 
-        conda activate pypsa-za
+        conda activate pypsa-rsa
         conda install -c conda-forge ipopt glpk
 
 .. warning::
@@ -114,7 +112,7 @@ Before first use, create a ``config.yaml`` by copying the example.
 
 .. code:: bash
 
-    .../pypsa-za % cp config.default.yaml config.yaml
+    .../pypsa-rsa % cp config.default.yaml config.yaml
 
 Users are advised to regularly check their own ``config.yaml`` against changes in the ``config.default.yaml``
 when pulling a new version from the remote repository.

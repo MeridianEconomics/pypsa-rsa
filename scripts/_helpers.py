@@ -762,6 +762,8 @@ def get_investment_periods(sns, multi_invest):
     return sns.get_level_values(0).unique().to_list() if multi_invest else [sns[0].year]
 
 def adjust_by_p_max_pu(n, config):
+    p_max = get_as_dense(n, "Generator", "p_max_pu")
+
     for carrier in config.keys():
         gen_list = n.generators[n.generators.carrier == carrier].index
         for p in config[carrier]:#["p_min_pu", "ramp_limit_up", "ramp_limit_down"]:

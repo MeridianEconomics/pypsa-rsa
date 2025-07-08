@@ -68,7 +68,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "PyPSA-ZA"
+project = "PyPSA-RSA"
 author = "Meridian Economics"
 copyright = f"{datetime.datetime.today().year}, {author}"
 
@@ -325,4 +325,8 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+#intersphinx_mapping = {"https://docs.python.org/": None}
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+}

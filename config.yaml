@@ -15,7 +15,7 @@ scenarios:
 #     corridors: Power_corridors
 
 gis:
-  path: "/media/pklein/1TB_SSD/Meridian Dropbox/ME Projects/03 R E S O U R C E S/Modelling data/GIS data"
+  path: "data"
   # definition of the Coordinate Reference Systems
   crs:
     geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps

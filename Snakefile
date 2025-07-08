@@ -54,7 +54,7 @@ rule add_electricity:
         supply_regions="resources/" + config["scenarios"]["folder"] + "/buses-{scenario}.geojson",
         load="data/bundle/SystemEnergy2009_22.csv",
         eskom_profiles="data/eskom_pu_profiles.csv",
-        renewable_profiles="pre_processing/resource_processing/renewable_profiles_updated.nc",
+        renewable_profiles="data/bundle/renewable_profiles_updated.nc",
     output: "networks/"+ config["scenarios"]["folder"] + "/elec/{model_type}-{scenario}.nc",
     script: "scripts/add_electricity.py"
 

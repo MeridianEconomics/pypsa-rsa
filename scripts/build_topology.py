@@ -75,11 +75,14 @@ def load_region_data(model_regions):
         snakemake.input.gdp_pop_data,
     ).to_crs(snakemake.config["gis"]["crs"]["distance_crs"])
 
-    joined = gpd.sjoin(gdp_pop, regions, how="inner", op="within")
+    joined = gpd.sjoin(gdp_pop, regions, how="inner", predicate="within")
     gva_cols = ["SIC1_2016", "SIC2_2016", "SIC3_2016", "SIC4_2016", "SIC6_2016", "SIC7_2016", "SIC8_2016", "SIC9_2016"]
     pop_col = ["POP_2016"]
     for col in gva_cols + pop_col:
-        regions[col] = joined.groupby(joined.index_right).sum()[col]
+        try:
+            regions[col] = joined[col].groupby(joined.name).sum()
+        except:
+            regions[col] = joined[col].groupby(joined.index_right).sum()
     
     regions["GVA_2016"] = regions[gva_cols].sum(axis=1)
     if len(regions)>1:
@@ -236,7 +239,7 @@ def calc_inter_region_lines(lines, line_config):
 
 def extend_topology(lines, regions, centroids):
     # get a list of lines between all adjacent regions
-    adj_lines = gpd.sjoin(regions, regions, op='touches')['index_right'].reset_index()
+    adj_lines = gpd.sjoin(regions, regions, predicate='touches')['index_right'].reset_index()
     adj_lines.columns = ['bus0', 'bus1']
     adj_lines['bus0'], adj_lines['bus1'] = np.sort(adj_lines[['bus0', 'bus1']].values, axis=1).T # sort bus0 and bus1 alphabetically
     adj_lines = adj_lines.drop_duplicates(subset=['bus0', 'bus1'])

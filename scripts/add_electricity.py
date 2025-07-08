@@ -390,7 +390,9 @@ def get_eaf_profiles(snapshots, type):
         out_df.index = range(1,54)
         std_dev = outages.loc[(_type, "std_dev_noise"),:]
 
-        eaf_hrly = out_df.loc[snapshots.week]
+        week_idx = snapshots.isocalendar().week      # pandas ≥ 1.1, still valid in 2.x
+        eaf_hrly = out_df.loc[week_idx]
+        #eaf_hrly = out_df.loc[snapshots.week]
         eaf_hrly.index = snapshots
 
         for col in eaf_hrly.columns:

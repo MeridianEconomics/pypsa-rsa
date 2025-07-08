@@ -31,8 +31,8 @@ The ``model_file.xlsx`` and ``config.yaml`` files are utilised to customise the 
 
 .. code:: bash
 
-    .../pypsa-za % cp config.tutorial.yaml config.yaml
-    .../pypsa-za % cp model_file_tutorial.xlsx model_file.xlsx
+    .../pypsa-rsa % cp config.tutorial.yaml config.yaml
+    .../pypsa-rsa % cp model_file_tutorial.xlsx model_file.xlsx
 
 ..
     This configuration is set to download a reduced data set via the rules :mod:`retrieve_databundle`,

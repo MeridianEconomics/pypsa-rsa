@@ -33,14 +33,14 @@ dependencies:
 - lxml
 - numpy
 - pandas
-- geopandas>=0.11.0
+- geopandas=0.11.0
 - fiona!=1.8.22
 - xarray
 - netcdf4
 - networkx
 - scipy
 - pydoe2
-- shapely>=2
+- shapely=1.8.5
 - pre-commit
 - pyomo
 - matplotlib<=3.5.2

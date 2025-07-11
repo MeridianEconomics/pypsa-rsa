@@ -51,7 +51,7 @@ import logging
 import numpy as np
 from operator import attrgetter
 import os
-import pypsa
+# import pypsa
 import re
 from _helpers import save_to_geojson, load_scenario_definition
 from base_network import get_years
@@ -355,7 +355,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             'build_topology', 
             **{
-                'scenario':'CNS_G_RB_CB_10_7',
+                'scenario':'IRP_REF_CI',
             }
         )
     logging.info("Loading scenario configuration")
@@ -364,10 +364,10 @@ if __name__ == "__main__":
 
     years = scenario_setup.loc["simulation_years"]
     if not isinstance(years, int):
-        years = list(map(int, re.split(",\s*", years)))
+        years = list(map(int, re.split(r",\s*", years)))
 
     logging.info("Loading region GIS data")
-    model_regions = str(scenario_setup.loc["regions"])
+    model_regions = str(int(scenario_setup.loc["regions"]))
     regions = load_region_data(model_regions)
 
     logging.info("Building regions")

@@ -15,7 +15,7 @@ scenarios:
 #     corridors: Power_corridors
 
 gis:
-  path: "data"
+  path: "data/bundle"
   # definition of the Coordinate Reference Systems
   crs:
     geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
@@ -170,7 +170,7 @@ costs:
 
 tsam_clustering:
   nprocesses: 10
-  solver: "cbc" #need to use open source solver here due to parallel processing of years
+  solver: "highs" #need to use open source solver here due to parallel processing of years
  
 solving:
   tmpdir: /tmp
@@ -178,7 +178,8 @@ solving:
     clip_p_max_pu: 1.e-2
     load_shedding: true
   solver:
-    name: xpress
-    lpflags: 4
-    crossover: 0
-    bargapstop: 1.e-6
+      name: highs
+      LpMethod: 0
+      Threads: 5
+      Presolve: 1
+      Crossover: 0

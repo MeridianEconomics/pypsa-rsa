@@ -69,11 +69,3 @@ rule prepare_and_solve_network:
         solver_slots=1
     script:
         "scripts/prepare_and_solve_network.py"
-
-rule solve_network_dispatch:
-    input:
-        dispatch_network="networks/elec/{scenario}/dispatch-{year}.nc",
-        optimised_network_stats="networks/network_stats/{scenario}.csv",
-    output: "networks/dispatch/{scenario}/dispatch_{year}.nc",
-    script:
-        "scripts/solve_network_dispatch.py"

@@ -58,7 +58,7 @@ import re
 import numpy as np
 import pandas as pd
 import pypsa
-from pypsa.linopt import get_var, write_objective, define_constraints, linexpr
+# from pypsa.linopt import get_var, write_objective, define_constraints, linexpr
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense, expand_series
 from pypsa.optimization.common import reindex
 
@@ -381,7 +381,7 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             'prepare_and_solve_network', 
             **{
-                'scenario':'LC_UNC',
+                'scenario':'IRP_REF_CI',
             }
         )
     logging.info("Preparing costs")

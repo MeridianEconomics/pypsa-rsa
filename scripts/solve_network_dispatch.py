@@ -204,7 +204,7 @@ if __name__ == "__main__":
                 'model_file':'TEST',
                 'regions':'1',
                 'resarea':'redz',
-                'll':'copt',
+                'll':'highs',
                 'opts':'LC',
                 'years':'2024',
             }

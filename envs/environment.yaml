@@ -1,87 +1,49 @@
-# SPDX-FileCopyrightText:  PyPSA-Earth and PyPSA-Eur Authors
-#
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
 name: pypsa-rsa
 channels:
-- conda-forge
-- bioconda
-- gurobi
-- nrel
-
+  - bioconda
+  - conda-forge
+  - defaults
 dependencies:
-- python[version='>=3.12']
-- pip
-- mamba   # esp for windows build
-
-- pypsa>=0.30.0
-# - atlite>=0.2.4  # until https://github.com/PyPSA/atlite/issues/244 is not merged
-- dask
-- powerplantmatching[version='>=0.5.15']
-- earth-osm>=0.1.0
-- atlite
-- nrel-pysam
-
-  # Dependencies of the workflow itself
-- xlrd
-- openpyxl
-- seaborn
-- snakemake-minimal[version='>=8.14']
-- memory_profiler
-- ruamel.yaml<=0.17.26
-- pytables
-- lxml
-- numpy
-- pandas [version='>=2.1']
-- geopandas[version='>=1']
-- fiona!=1.8.22
-- xarray [version='>=2023.11.0']
-- netcdf4
-- networkx
-- scipy
-- pydoe2
-- shapely[version='>=2.0']
-- pre-commit
-- pyomo
-- matplotlib
-- reverse-geocode
-- country_converter
-
-  # Keep in conda environment when calling ipython
-- ipython
-  # Jupyter notebook requirement
-- ipykernel
-- jupyterlab
-
-  # GIS dependencies:
-- cartopy
-- descartes
-- rasterio!=1.2.10
-- rioxarray
-
- # Plotting
-- geoviews
-- hvplot
-- graphviz
-- contextily
-- graphviz
-
-  # PyPSA-Eur-Sec Dependencies
-- geopy
-- tqdm
-- pytz
-- country_converter
-
-  # Cloud download
-# - googledrivedownloader  # Commented until https://github.com/ndrplz/google-drive-downloader/pull/28 is merged: PR installed using pip
-
-# Default solver for tests (required for CI)
-- glpk
-- ipopt<3.13.3
-- gurobi
-
-- pip:
-  - git+https://github.com/davide-f/google-drive-downloader@master  # google drive with fix for virus scan
-  - git+https://github.com/FRESNA/vresutils@master  # until new pip release > 0.3.1 (strictly)
-  - tsam>=1.1.0
-  - chaospy  # lastest version only available on pip
+  - atlite[version='>=0.2.9']
+  - cartopy
+  - country_converter
+  - dask
+  - descartes
+  - fiona
+  - geopandas[version='>=1']
+  - geopy
+  - glpk
+  - graphviz
+  - ipython
+  - lxml
+  - matplotlib
+  - memory_profiler
+  - netcdf4
+  - networkx
+  - numpy
+  - openpyxl!=3.1.1
+  - pandas[version='>=2.1']
+  - pip
+  - powerplantmatching[version='>=0.5.15']
+  - pre-commit
+  - proj
+  - pycountry
+  - pypsa=0.30.0
+  - pyscipopt
+  - pytables
+  - python[version='>=3.8']
+  - pytz
+  - pyxlsb
+  - rasterio!=1.2.10
+  - rioxarray
+  - scipy
+  - seaborn
+  - shapely[version='>=2.0']
+  - snakemake-minimal[version='>=8.14']
+  - tabula-py
+  - tqdm
+  - xarray[version='>=2023.11.0']
+  - xlrd
+  - yaml
+  - ipykernel
+  - tsam

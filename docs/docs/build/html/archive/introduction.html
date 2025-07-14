@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-GB">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; PyPSA-ZA  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/theme_overrides.css?v=52e7e328" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=47a5c9ec"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/translations.js?v=90965dfc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyPSA-ZA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data_workflow.html">Data used by the model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../wildcards.html">Wildcards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costs.html">Cost Assumptions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference (automated)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to_contribute.html">Сontribute</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyPSA-ZA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/archive/introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<section id="history">
+<h2>History<a class="headerlink" href="#history" title="Permalink to this heading"></a></h2>
+<p>Historically, commercial tools have been extensively utilised by both governments and utilities to develop capacity
+expansion plans. One of the challenges of utilising such commercial tools to support transparent energy policy is
+the closed nature of the models, which are essentially a ‘black-box’. For this reason, initiatives such as
+<a class="reference external" href="https://openmod-initiative.org/manifesto.html">openmod</a> have been developed with the goal of creating open energy
+modelling platforms that are based on <a class="reference external" href="https://opensource.com/resources/what-open-source">open-source software</a> as well as open data.</p>
+<p><a class="reference external" href="https://pypsa.org/">PyPSA (Python for Power System Analysis)</a> is a diverse toolbox of modules that can be assembled to produce a power / energy
+system modelling framework to meet specific requirements. As described by <a class="reference external" href="https://arxiv.org/pdf/1707.09913.pdf">Brown et al</a>
+PyPSA includes a toolbox of modules for multi-horizon investment planning, unit commitment of conventional generators,
+time-varying renewable generators, storage units, all combinations of direct and alternating current electricity networks,
+and the coupling of electricity to other energy sectors, such as gas, heating and transport.</p>
+<p>An initial PyPSA-ZA model of the South African power system called PyPSA-ZA was developed by <a class="reference external" href="https://arxiv.org/pdf/1710.11199.pdf">Hörsch
+and Calitz</a> who studied a future renewable energy based
+South African electricity network for a single reference year (in other words, it was not an
+intertemporally optimised power system development model – showing an optimised transition
+over time – it only provided a snapshot of an optimised high renewables system at a particular
+point in time – 2040, albeit with reasonable spatial (network) resolution. The initial PyPSA-ZA model
+is described and evaluated in the paper
+<a class="reference external" href="https://arxiv.org/abs/1710.11199">PyPSA-ZA: Investment and operation co-optimization of integrating wind and solar in South Africa at high spatial and temporal detail</a>.</p>
+<p><a class="reference external" href="https://pypsa.org/">PyPSA</a> has also been utilised to build an extensive interconnected power system model of the European power system
+<a class="reference external" href="https://github.com/PyPSA/pypsa-eur">PyPSA-Eur</a>. This model has been further extended to include full sector
+coupling of power, transportation and heat demand <a class="reference external" href="https://github.com/PyPSA/pypsa-eur-sec">PyPSA-Eur-Sec</a>.
+Like the PyPSA-ZA model, the PyPSA-Eur model framework has been designed to handle high spatial resolution
+(detailed network specification, i.e. grid constraints), but it does not perform multi-year optimisation and instead analyses
+a single year snapshot. In the African context the project <a class="reference external" href="https://github.com/pypsa-meets-earth/pypsa-earth">PyPSA-Meets-Earth</a>
+is currently ongoing and aims to develop an interconnected, high-level, African power system model on the same basis as PyPSA-Eur.
+Multi-horizon planning functionality, based on the assumption of “perfect foresight”, was only recently added to PyPSA in 2021,
+and currently PyPSA-Eur, PyPSA-ZA, and PyPSA-meets-Earth do not yet incorporate this capability.
+The PyPSA-Eur-Sec model does include myopic expansion planning capability that is based on separating the planning horizon
+into several shorter periods that are solved as separate optimisations.</p>
+<p>Currently, there is no existing <a class="reference external" href="https://pypsa.org/">PyPSA</a> model
+for South Africa that can be used to address the multi-year, least cost optimised, transition path to
+a decarbonised power sector over the coming decades. Therefore, an updated and expanded PyPSA-ZA model
+is required that is comparable with the existing, mostly proprietary, modelling approaches that are
+used in the country.</p>
+<p>In 2022 <a class="reference external" href="https://meridianeconomics.co.za/">Meridian Economics</a> leveraged the experience from
+<a class="reference external" href="https://github.com/PyPSA/pypsa-eur">PyPSA-Eur</a>, PyPSA-ZA and <a class="reference external" href="https://pypsa-meets-earth.github.io/">PyPSA meets Earth</a>
+to significantly shorten the development time frame for the new model. <a class="reference external" href="https://meridianeconomics.co.za/">Meridian Economics</a> has undergone extensive work in terms of
+input datasets, model development, and validation against existing results from commercial tools to establish PyPSA-ZA credibility to ensure that the outcomes can
+be trusted to support policy decisions. The updated PyPSA-ZA model has the following capabilities:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Updated</span> <span class="pre">input</span> <span class="pre">data</span></code>: Includes latest assumptions around technology performance and learning rates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Multi-horizon</span> <span class="pre">capacity</span> <span class="pre">expansion</span> <span class="pre">planning</span></code>: Myopic and/or perfect foresight expansion capabilities which can solve in five-year time steps up to 2050.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Validation</span> <span class="pre">test</span> <span class="pre">case</span></code> : Benchmarked case studies using existing energy planning results in the public domain such as those developed by the <a class="reference external" href="https://www.csir.co.za/">CSIR</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Solar</span> <span class="pre">and</span> <span class="pre">wind</span> <span class="pre">resource</span> <span class="pre">assessment</span></code> : Utilises the <a class="reference external" href="https://github.com/PyPSA/atlite">Atlite module</a> and <a class="reference external" href="https://globalwindatlas.info/en">Global Wind Atlas</a> to generate renewable potentials for South Africa’s Renewable Energy Development Zones.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Model</span> <span class="pre">file</span></code> : Input excel spreadsheet for easier model input.</p></li>
+</ul>
+</section>
+<section id="folder-structure">
+<h2>Folder structure<a class="headerlink" href="#folder-structure" title="Permalink to this heading"></a></h2>
+<p>The content in this package is organized in folders as described below; for more details, please see the documentation.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data</span></code>: Includes input data that is not produced by any <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> rule.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scripts</span></code>: Includes all the Python scripts executed by the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> rules.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resources</span></code>: Stores intermediate results of the workflow which can be picked up again by subsequent rules.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">networks</span></code>: Stores intermediate, unsolved stages of the PyPSA network that describes the energy system model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">results</span></code>: Stores the solved PyPSA network data, summary files and plots.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">benchmarks</span></code>: Stores <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> benchmarks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logs</span></code>: Stores log files about solving, including the solver output, console output and the output of a memory logger.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">envs</span></code>: Stores the conda environment files to successfully run the workflow.</p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
+<p>PyPSA-ZA work is released under multiple licenses:</p>
+<ul class="simple">
+<li><p>All original source code is licensed as free software under <a class="reference external" href="https://github.com/PyPSA/pypsa-eur/blob/master/LICENSES/MIT.txt">MIT License</a>.</p></li>
+<li><p>The documentation is licensed under <a class="reference external" href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a>.</p></li>
+<li><p>Configuration files are mostly licensed under <a class="reference external" href="https://creativecommons.org/publicdomain/zero/1.0/">CC0-1.0</a>.</p></li>
+<li><p>Data files are licensed under different licenses as noted below.</p></li>
+</ul>
+<p>Licenses and urls of the data used in PyPSA-ZA:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Files</p></th>
+<th class="head"><p>BY</p></th>
+<th class="head"><p>NC</p></th>
+<th class="head"><p>SA</p></th>
+<th class="head"><p>Mark Changes</p></th>
+<th class="head"><p>Detail</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>supply_regions/11-supply.shp</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p><a class="reference external" href="https://www.eskom.co.za/eskom-divisions/tx/gcca/">https://www.eskom.co.za/eskom-divisions/tx/gcca/</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>supply_regions/RSA.shp</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p><a class="reference external" href="https://www.eskom.co.za/eskom-divisions/tx/gcca/">https://www.eskom.co.za/eskom-divisions/tx/gcca/</a></p></td>
+</tr>
+<tr class="row-even"><td><p>SAPAD_OR_2017_Q2/*</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td><p><a class="reference external" href="https://egis.environment.gov.za/protected_and_conservation_areas_database">https://egis.environment.gov.za/protected_and_conservation_areas_database</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>SACAD_OR_2017_Q2/*</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td><p><a class="reference external" href="https://egis.environment.gov.za/protected_and_conservation_areas_database">https://egis.environment.gov.za/protected_and_conservation_areas_database</a></p></td>
+</tr>
+<tr class="row-even"><td><p>REDZ_DEA_Unpublished_Draft_2015/*</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td><p><a class="reference external" href="https://egis.environment.gov.za/redz">https://egis.environment.gov.za/redz</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Phase2_REDZs/*</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td><p><a class="reference external" href="https://egis.environment.gov.za/redz">https://egis.environment.gov.za/redz</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Power_corridors</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td><p><a class="reference external" href="https://egis.environment.gov.za/egi">https://egis.environment.gov.za/egi</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>SystemEnergy2009_13.csv</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>Eskom System Energy 2009-13 Hourly available from Eskom on request</p></td>
+</tr>
+<tr class="row-even"><td><p>ZAF_wind-speed_100m.tif</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><a class="reference external" href="https://globalwindatlas.info/en/area/South%20Africa">https://globalwindatlas.info/en/area/South%20Africa</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Supply_area_normalised power feed-in for PV.xlsx</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><a class="reference external" href="https://www.csir.co.za/csir-energy-centre-documents">https://www.csir.co.za/csir-energy-centre-documents</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Supply_area_normalised power feed-in for Wind.xlsx</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p><a class="reference external" href="https://www.csir.co.za/csir-energy-centre-documents">https://www.csir.co.za/csir-energy-centre-documents</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Existing Power Stations SA.xlsx</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td><p><a class="reference external" href="https://www.energy.gov.za/IRP/2016/Draft-IRP-2016-Assumptions-Base-Case-and-Observations-Revision1.pdf">https://www.energy.gov.za/IRP/2016/Draft-IRP-2016-Assumptions-Base-Case-and-Observations-Revision1.pdf</a></p></td>
+</tr>
+<tr class="row-even"><td><p>SALandCover_OriginalUTM35North_2013_GTI_72Classes</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td><p><a class="reference external" href="https://egis.environment.gov.za/sa_national_land_cover_datasets">https://egis.environment.gov.za/sa_national_land_cover_datasets</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>data/EIA_hydro_generation_2011_2014.csv</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td><p>U.S. EIA Hydroelectricity Net Generation ZA and MZ 2011-2014 (2017).</p></td>
+</tr>
+<tr class="row-even"><td><p>data/bundle/South_Africa_100m_Population/ZAF15adjv4.tif</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td></td>
+<td></td>
+<td><p><a class="reference external" href="https://hub.worldpop.org/doi/10.5258/SOTON/WP00246">https://hub.worldpop.org/doi/10.5258/SOTON/WP00246</a></p></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><p><em>BY: Attribute Source</em></p></li>
+<li><p><em>NC: Non-Commercial Use Only</em></p></li>
+<li><p><em>SA: Share Alike</em></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Meridian Economics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

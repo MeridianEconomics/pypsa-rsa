@@ -1,0 +1,680 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-GB">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference (automated) &mdash; PyPSA-ZA  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/theme_overrides.css?v=52e7e328" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=47a5c9ec"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/translations.js?v=90965dfc"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Release Notes" href="release_notes.html" />
+    <link rel="prev" title="Cost Assumptions" href="costs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyPSA-ZA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_workflow.html">Data used by the model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wildcards.html">Wildcards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="costs.html">Cost Assumptions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference (automated)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-_helpers">_helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.configure_logging"><code class="docutils literal notranslate"><span class="pre">configure_logging()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.get_aggregation_strategies"><code class="docutils literal notranslate"><span class="pre">get_aggregation_strategies()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.load_network"><code class="docutils literal notranslate"><span class="pre">load_network()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.mock_snakemake"><code class="docutils literal notranslate"><span class="pre">mock_snakemake()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.progress_retrieve"><code class="docutils literal notranslate"><span class="pre">progress_retrieve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.read_csv_nafix"><code class="docutils literal notranslate"><span class="pre">read_csv_nafix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.sets_path_to_root"><code class="docutils literal notranslate"><span class="pre">sets_path_to_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#helpers.single_year_network_copy"><code class="docutils literal notranslate"><span class="pre">single_year_network_copy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-add_electricity">add_electricity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#relevant-settings">Relevant Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inputs">Inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#outputs">Outputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.annualise_costs"><code class="docutils literal notranslate"><span class="pre">annualise_costs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.attach_load"><code class="docutils literal notranslate"><span class="pre">attach_load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.generate_eskom_re_profiles"><code class="docutils literal notranslate"><span class="pre">generate_eskom_re_profiles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.generate_fixed_wind_solar_profiles"><code class="docutils literal notranslate"><span class="pre">generate_fixed_wind_solar_profiles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.group_components"><code class="docutils literal notranslate"><span class="pre">group_components()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.load_extendable_parameters"><code class="docutils literal notranslate"><span class="pre">load_extendable_parameters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.load_fixed_components"><code class="docutils literal notranslate"><span class="pre">load_fixed_components()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.map_components_to_buses"><code class="docutils literal notranslate"><span class="pre">map_components_to_buses()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add_electricity.proj_eaf_override"><code class="docutils literal notranslate"><span class="pre">proj_eaf_override()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-base_network">base_network</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Relevant Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#build-cutout">build_cutout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-natura-raster">build_natura_raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-renewable-profiles">build_renewable_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-build_topology">build_topology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Relevant Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Outputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build_topology.save_to_geopackage"><code class="docutils literal notranslate"><span class="pre">save_to_geopackage()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#plot-network">plot_network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-network">prepare_network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solve-network">solve_network</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to_contribute.html">Сontribute</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyPSA-ZA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference (automated)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api_reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference-automated">
+<span id="api"></span><h1>API Reference (automated)<a class="headerlink" href="#api-reference-automated" title="Permalink to this heading"></a></h1>
+<section id="module-_helpers">
+<span id="helpers"></span><h2>_helpers<a class="headerlink" href="#module-_helpers" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.configure_logging">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">configure_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snakemake</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_handlers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.configure_logging" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Configure the basic behaviour for the logging module.</p>
+<p>Note: Must only be called once from the __main__ section of a script.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>if not os.path.exists(folder_name):</dt><dd><p># If it doesn’t exist, create it
+os.makedirs(folder_name)
+print(f”Folder ‘{folder_name}’ was created.”)</p>
+</dd>
+<dt>else:</dt><dd><dl class="simple">
+<dt>print(f”Folder ‘{folder_name}’ already exists.”)lse (default)</dt><dd><p>Do (not) skip the default handlers created for redirecting output to STDERR and file.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.get_aggregation_strategies">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">get_aggregation_strategies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aggregation_strategies</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.get_aggregation_strategies" title="Permalink to this definition"></a></dt>
+<dd><p>default aggregation strategies that cannot be defined in .yaml format must be specified within
+the function, otherwise (when defaults are passed in the function’s definition) they get lost
+when custom values are specified in the config.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.load_network">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">load_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">import_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.load_network" title="Permalink to this definition"></a></dt>
+<dd><p>Helper for importing a pypsa.Network with additional custom components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>import_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – As in pypsa.Network(import_name)</p></li>
+<li><p><strong>custom_components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – <p>Dictionary listing custom components.
+For using <code class="docutils literal notranslate"><span class="pre">snakemake.config[&quot;override_components&quot;]</span></code>
+in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> define:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">override_components</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ShadowPrice</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">component</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;shadow_prices&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;Shadow</span><span class="nv"> </span><span class="s">price</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">global</span><span class="nv"> </span><span class="s">constraint.&quot;</span><span class="p p-Indicator">,</span><span class="nv">np.nan</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;string&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;n/a&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;n/a&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;Unique</span><span class="nv"> </span><span class="s">name&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;Input</span><span class="nv"> </span><span class="s">(required)&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;float&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;n/a&quot;</span><span class="p p-Indicator">,</span><span class="nv">0.</span><span class="p p-Indicator">,</span><span class="s">&quot;shadow</span><span class="nv"> </span><span class="s">value&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;Output&quot;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pypsa.Network</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.mock_snakemake">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">mock_snakemake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rulename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">wildcards</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.mock_snakemake" title="Permalink to this definition"></a></dt>
+<dd><p>This function is expected to be executed from the “scripts”-directory of ”
+the snakemake project. It returns a snakemake.script.Snakemake object,
+based on the Snakefile.</p>
+<p>If a rule has wildcards, you have to specify them in <a href="#id1"><span class="problematic" id="id2">**</span></a>wildcards.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rulename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – name of the rule for which the snakemake object should be generated</p></li>
+<li><p><strong>**wildcards</strong> – keyword arguments fixing the wildcards. Only necessary if wildcards are
+needed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.progress_retrieve">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">progress_retrieve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disable_progress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roundto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.progress_retrieve" title="Permalink to this definition"></a></dt>
+<dd><p>Function to download data from a url with a progress bar progress in retrieving data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Url to download data from</p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – File where to save the output</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Data for the request (default None), when not none Post method is used</p></li>
+<li><p><strong>disable_progress</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – When true, no progress bar is shown</p></li>
+<li><p><strong>roundto</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – (default 0) Precision used to report the progress
+e.g. 0.1 stands for 88.1, 10 stands for 90, 80</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.read_csv_nafix">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">read_csv_nafix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.read_csv_nafix" title="Permalink to this definition"></a></dt>
+<dd><p>Function to open a csv as pandas file and standardize the na value</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.sets_path_to_root">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">sets_path_to_root</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_directory_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.sets_path_to_root" title="Permalink to this definition"></a></dt>
+<dd><p>Search and sets path to the given root directory (root/path/file).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root_directory_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the root directory.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of folders the function will check upwards/root directed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="helpers.single_year_network_copy">
+<span class="sig-prename descclassname"><span class="pre">_helpers.</span></span><span class="sig-name descname"><span class="pre">single_year_network_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">investment_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_standard_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#helpers.single_year_network_copy" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a deep copy of the Network object with all components and time-
+dependent data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>network</strong></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pypsa.Network</p>
+</dd>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>with_time</strong> (<em>boolean</em><em>, </em><em>default True</em>) – Copy snapshots and time-varying network.component_names_t data too.</p></li>
+<li><p><strong>snapshots</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> or </em><em>index slice</em>) – A list of snapshots to copy, must be a subset of
+network.snapshots, defaults to network.snapshots</p></li>
+<li><p><strong>ignore_standard_types</strong> (<em>boolean</em><em>, </em><em>default False</em>) – Ignore the PyPSA standard types.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">network_copy</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-add_electricity">
+<span id="add-electricity"></span><h2>add_electricity<a class="headerlink" href="#module-add_electricity" title="Permalink to this heading"></a></h2>
+<p>Adds fixed and extendable components to the base network. The primary functions run inside main are:</p>
+<blockquote>
+<div><p>attach_load
+attach_fixed_generators
+attach_extendable_generators
+attach_fixed_storage
+attach_extendable_storage</p>
+</div></blockquote>
+<section id="relevant-settings">
+<h3>Relevant Settings<a class="headerlink" href="#relevant-settings" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">costs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">year</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">USD_to_ZAR</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">EUR_to_ZAR</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">marginal_cost</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">dicountrate</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">emission_prices</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">load_shedding</span><span class="p">:</span>
+
+<span class="nt">electricity</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">max_hours</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">marginal_cost</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">capital_cost</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">conventional_carriers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">co2limit</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">extendable_carriers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">include_renewable_capacities_from_OPSD</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">estimate_renewable_capacities_from_capacity_stats</span><span class="p">:</span>
+
+<span class="nt">load</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">scale</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ssp</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">weather_year</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">prediction_year</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">region_load</span><span class="p">:</span>
+
+<span class="nt">renewable</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">hydro</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">carriers</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hydro_max_hours</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">hydro_capital_cost</span><span class="p">:</span>
+
+<span class="nt">lines</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">length_factor</span><span class="p">:</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Documentation of the configuration file <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> at <a class="reference internal" href="configuration.html#costs-cf"><span class="std std-ref">costs</span></a>,
+<a class="reference internal" href="configuration.html#electricity-cf"><span class="std std-ref">electricity</span></a>, <span class="xref std std-ref">load_cf</span>, <a class="reference internal" href="configuration.html#renewable-cf"><span class="std std-ref">renewable</span></a>, <a class="reference internal" href="configuration.html#lines-cf"><span class="std std-ref">lines</span></a></p>
+</div>
+</section>
+<section id="inputs">
+<h3>Inputs<a class="headerlink" href="#inputs" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model_file.xlsx</span></code>: The database to setup different scenarios based on cost assumptions for all included technologies for specific years from various sources; e.g. discount rate, lifetime, investment (CAPEX), fixed operation and maintenance (FOM), variable operation and maintenance (VOM), fuel costs, efficiency, carbon-dioxide intensity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/Eskom</span> <span class="pre">EAF</span> <span class="pre">data.xlsx</span></code>: Hydropower plant store/discharge power capacities, energy storage capacity, and average hourly inflow by country.  Not currently used!</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/eskom_pu_profiles.csv</span></code>: alternative to capacities above; not currently used!</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/bundle/SystemEnergy2009_22.csv</span></code> Hourly country load profiles produced by GEGIS</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resources/regions_onshore.geojson</span></code>: confer <span class="xref std std-ref">busregions</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resources/gadm_shapes.geojson</span></code>: confer <span class="xref std std-ref">shapes</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/bundle/supply_regions/{regions}.shp</span></code>: confer <span class="xref std std-ref">powerplants</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resources/profile_{}_{regions}_{resarea}.nc</span></code>: all technologies in <code class="docutils literal notranslate"><span class="pre">config[&quot;renewables&quot;].keys()</span></code>, confer <span class="xref std std-ref">renewableprofiles</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">networks/base_{model_file}_{regions}.nc</span></code>: confer <span class="xref std std-ref">base</span></p></li>
+</ul>
+</section>
+<section id="outputs">
+<h3>Outputs<a class="headerlink" href="#outputs" title="Permalink to this heading"></a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">networks/elec_{model_file}_{regions}_{resarea}.nc</span></code>:</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="../img/elec.png"><img alt="../img/elec.png" src="../img/elec.png" /></a>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="description">
+<h3>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h3>
+<p>The rule <a class="reference internal" href="archive/api_reference.html#module-add_electricity" title="add_electricity"><code class="xref py py-mod docutils literal notranslate"><span class="pre">add_electricity</span></code></a> ties all the different data inputs from the preceding rules together into a detailed PyPSA network that is stored in <code class="docutils literal notranslate"><span class="pre">networks/elec.nc</span></code>. It includes:</p>
+<ul class="simple">
+<li><p>today”s transmission topology and transfer capacities (in future, optionally including lines which are under construction according to the config settings <code class="docutils literal notranslate"><span class="pre">lines:</span> <span class="pre">under_construction</span></code> and <code class="docutils literal notranslate"><span class="pre">links:</span> <span class="pre">under_construction</span></code>),</p></li>
+<li><p>today”s thermal and hydro power generation capacities (for the technologies listed in the config setting <code class="docutils literal notranslate"><span class="pre">electricity:</span> <span class="pre">conventional_carriers</span></code>), and</p></li>
+<li><p>today”s load time-series (upsampled in a top-down approach according to population and gross domestic product)</p></li>
+</ul>
+<p>It further adds extendable <code class="docutils literal notranslate"><span class="pre">generators</span></code> with <strong>zero</strong> capacity for</p>
+<ul class="simple">
+<li><p>photovoltaic, onshore and AC- as well as DC-connected offshore wind installations with today”s locational, hourly wind and solar capacity factors (but <strong>no</strong> current capacities),</p></li>
+<li><p>additional open- and combined-cycle gas turbines (if <code class="docutils literal notranslate"><span class="pre">OCGT</span></code> and/or <code class="docutils literal notranslate"><span class="pre">CCGT</span></code> is listed in the config setting <code class="docutils literal notranslate"><span class="pre">electricity:</span> <span class="pre">extendable_carriers</span></code>)</p></li>
+</ul>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.annualise_costs">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">annualise_costs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">investment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lifetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discount_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FOM</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.annualise_costs" title="Permalink to this definition"></a></dt>
+<dd><p>Annualises the costs of an investment over its lifetime.The costs are annualised using the
+Capital Recovery Factor (CRF) formula.</p>
+<p>Args:
+- investment: The overnight investment cost.
+- lifetime: The lifetime of the investment.
+- discount_rate: The discount rate used for annualisation.
+- FOM: The fixed operating and maintenance costs.</p>
+<p>Returns:
+A Series containing the annualised costs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.attach_load">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">attach_load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_setup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.attach_load" title="Permalink to this definition"></a></dt>
+<dd><p>Attaches load to the network based on the provided annual demand.
+Demand is disaggregated by the load_disaggreate function according to either population
+or GVA (GDP) in each region.</p>
+<p>Args:
+- n: The network object.
+- annual_demand: A DataFrame containing the annual demand values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.generate_eskom_re_profiles">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">generate_eskom_re_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carriers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.generate_eskom_re_profiles" title="Permalink to this definition"></a></dt>
+<dd><p>Generates Eskom renewable energy profiles for the network, based on the Eskom Data Portal information, found under
+<a class="reference external" href="https://www.eskom.co.za/dataportal/">https://www.eskom.co.za/dataportal/</a>. Data is available from 2018 to 2023 for aggregate carriers (e.g. all solar_pv, biomass, hydro etc).
+The user can specify whether to use this data under config.yaml. These Eskom profiles for biomass, hydro and hydro_import are used by default.</p>
+<p>Args:
+- n: The PyPSA network object.</p>
+<p>Relevant config.yaml settings:
+electricity:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>renewable_generators:</dt><dd><p>carriers:</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>years:</dt><dd><p>reference_weather_years:</p>
+</dd>
+<dt>enable:</dt><dd><p>use_eskom_wind_solar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.generate_fixed_wind_solar_profiles">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">generate_fixed_wind_solar_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gens</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">carriers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pu_profiles</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.generate_fixed_wind_solar_profiles" title="Permalink to this definition"></a></dt>
+<dd><p>Generates fixed wind and solar PV profiles for the network based on timeseries data that is pre-calculated
+and using the notebooks under resource_processing. Data is loaded from NetCDF format.</p>
+<p>Args:
+- n: The network object.
+- gens: A DataFrame containing the generator information.
+- snapshots: A Series containing the snapshots.
+- pu_profiles: The DataFrame to store the pu profiles.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.group_components">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">group_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.group_components" title="Permalink to this definition"></a></dt>
+<dd><p>Apply grouping of similar carrier if specified in snakemake config.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>component_df</strong> – A DataFrame containing generator/storage_unit data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>grouped_df, non_grouped_df</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing two DataFrames</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.load_extendable_parameters">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">load_extendable_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_setup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snakemake</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.load_extendable_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>set all asset costs tab in the model file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.load_fixed_components">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">load_fixed_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">carriers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tech_flag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.load_fixed_components" title="Permalink to this definition"></a></dt>
+<dd><p>Load components from a model file based on specified filters and configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_file</strong> – The file path to the model file.</p></li>
+<li><p><strong>scenario_setup</strong> – The model setup object.</p></li>
+<li><p><strong>carriers</strong> – A list of carriers to filter the generators.</p></li>
+<li><p><strong>start_year</strong> – The start year for the components.</p></li>
+<li><p><strong>config</strong> – A dictionary containing configuration settings.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame containing the loaded components.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.map_components_to_buses">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">map_components_to_buses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.map_components_to_buses" title="Permalink to this definition"></a></dt>
+<dd><p>Associate every generator/storage_unit with the bus of the region based on GPS coords.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component_df</strong> – A DataFrame containing generator/storage_unit data.</p></li>
+<li><p><strong>regions</strong> – The file path to the regions shapefile.</p></li>
+<li><p><strong>crs_config</strong> – A dictionary containing coordinate reference system configurations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A DataFrame with the generators associated with their respective bus.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="add_electricity.proj_eaf_override">
+<span class="sig-prename descclassname"><span class="pre">add_electricity.</span></span><span class="sig-name descname"><span class="pre">proj_eaf_override</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eaf_hrly</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_EAF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'extendable'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#add_electricity.proj_eaf_override" title="Permalink to this definition"></a></dt>
+<dd><p>Overrides the hourly EAF (Energy Availability Factor) values with projected EAF values, if these are defined
+under the project_parameters tab in the model_file.xlsx. Existing generators have suffix _EAF and extendable generators
+have the suffix _extendable_EAF by convention.</p>
+<p>Args:
+- eaf_hrly: A DataFrame containing the hourly EAF values.
+- projections: A DataFrame containing the projected EAF values.
+- snapshots: A Series containing the snapshots.
+- include: A string used to filter the projections based on the index.
+- exclude: A string used to exclude certain projections based on the index.</p>
+<dl class="simple">
+<dt>Relevant model_file.xlsx settings:</dt><dd><p>project_parameters: parameters with _EAF or _extendable_EAF suffix</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-base_network">
+<span id="base-network"></span><h2>base_network<a class="headerlink" href="#module-base_network" title="Permalink to this heading"></a></h2>
+<p>Creates the network topology for South Africa from either South Africa”s shape file, GCCA map extract for 10 supply regions or 27-supply regions shape file as a PyPSA
+network.</p>
+<section id="id3">
+<h3>Relevant Settings<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">snapshots</span><span class="p">:</span>
+
+<span class="nt">supply_regions</span><span class="p">:</span>
+
+<span class="nt">electricity</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">voltages</span><span class="p">:</span>
+
+<span class="nt">lines</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">types</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">s_max_pu</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">under_construction</span><span class="p">:</span>
+
+<span class="nt">links</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">p_max_pu</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">under_construction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">include_tyndp</span><span class="p">:</span>
+
+<span class="nt">transformers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">x</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">s_nom</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Documentation of the configuration file <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> at
+<a class="reference internal" href="configuration.html#snapshots-cf"><span class="std std-ref">snapshots- now specified in model_file.xlsx</span></a>, <span class="xref std std-ref">toplevel_cf</span>, <a class="reference internal" href="configuration.html#electricity-cf"><span class="std std-ref">electricity</span></a>, <span class="xref std std-ref">load_cf</span>,
+<a class="reference internal" href="configuration.html#lines-cf"><span class="std std-ref">lines</span></a>, <a class="reference internal" href="configuration.html#links-cf"><span class="std std-ref">links</span></a>, <span class="xref std std-ref">transformers_cf</span></p>
+</div>
+</section>
+<section id="id4">
+<h3>Inputs<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data/bundle/supply_regions/{regions}.shp</span></code>:  Shape file for different supply regions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/bundle/South_Africa_100m_Population/ZAF15adjv4.tif</span></code>: Raster file of South African population from <a class="reference external" href="https://hub.worldpop.org/doi/10.5258/SOTON/WP00246">https://hub.worldpop.org/doi/10.5258/SOTON/WP00246</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/num_lines.xlsx</span></code>: confer <span class="xref std std-ref">lines</span></p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>Outputs<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">networks/base_{model_file}_{regions}.nc</span></code></p>
+<blockquote>
+<div><a class="reference internal image-reference" href="../img/base.png"><img alt="../img/base.png" src="../img/base.png" /></a>
+</div></blockquote>
+</li>
+</ul>
+</section>
+</section>
+<section id="build-cutout">
+<h2>build_cutout<a class="headerlink" href="#build-cutout" title="Permalink to this heading"></a></h2>
+</section>
+<section id="build-natura-raster">
+<h2>build_natura_raster<a class="headerlink" href="#build-natura-raster" title="Permalink to this heading"></a></h2>
+</section>
+<section id="build-renewable-profiles">
+<h2>build_renewable_profiles<a class="headerlink" href="#build-renewable-profiles" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-build_topology">
+<span id="build-topology"></span><h2>build_topology<a class="headerlink" href="#module-build_topology" title="Permalink to this heading"></a></h2>
+<p>Creates the network topology (buses and lines).</p>
+<section id="id6">
+<h3>Relevant Settings<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">snapshots</span><span class="p">:</span>
+
+<span class="nt">electricity</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">voltages</span><span class="p">:</span>
+
+<span class="nt">lines</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">types</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">s_max_pu</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">under_construction</span><span class="p">:</span>
+
+<span class="nt">links</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">p_max_pu</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">under_construction</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">include_tyndp</span><span class="p">:</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Documentation of the configuration file <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> at
+<a class="reference internal" href="configuration.html#snapshots-cf"><span class="std std-ref">snapshots- now specified in model_file.xlsx</span></a>, <span class="xref std std-ref">toplevel_cf</span>, <a class="reference internal" href="configuration.html#electricity-cf"><span class="std std-ref">electricity</span></a>, <span class="xref std std-ref">load_cf</span>,
+<a class="reference internal" href="configuration.html#lines-cf"><span class="std std-ref">lines</span></a>, <a class="reference internal" href="configuration.html#links-cf"><span class="std std-ref">links</span></a>, <span class="xref std std-ref">transformers_cf</span></p>
+</div>
+</section>
+<section id="id7">
+<h3>Inputs<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">data/bundle/supply_regions/{regions}.shp</span></code>:  Shape file for different supply regions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">data/num_lines.xlsx</span></code>: confer <span class="xref std std-ref">links</span></p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>Outputs<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">resources/buses_{regions}.geojson</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resources/lines_{regions}.geojson</span></code></p></li>
+</ul>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="build_topology.save_to_geopackage">
+<span class="sig-prename descclassname"><span class="pre">build_topology.</span></span><span class="sig-name descname"><span class="pre">save_to_geopackage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#build_topology.save_to_geopackage" title="Permalink to this definition"></a></dt>
+<dd><p>Saves a GeoDataFrame to a GeoPackage.</p>
+<p>Parameters:
+gdf (GeoDataFrame): The GeoDataFrame to save.
+layer_name (str): The name of the layer.
+filename (str): The path to the GeoPackage file.</p>
+</dd></dl>
+
+</section>
+<section id="plot-network">
+<h2>plot_network<a class="headerlink" href="#plot-network" title="Permalink to this heading"></a></h2>
+</section>
+<section id="prepare-network">
+<h2>prepare_network<a class="headerlink" href="#prepare-network" title="Permalink to this heading"></a></h2>
+</section>
+<section id="solve-network">
+<h2>solve_network<a class="headerlink" href="#solve-network" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="costs.html" class="btn btn-neutral float-left" title="Cost Assumptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="release_notes.html" class="btn btn-neutral float-right" title="Release Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Meridian Economics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

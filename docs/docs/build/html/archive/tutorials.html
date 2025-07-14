@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-GB">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial &mdash; PyPSA-ZA  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../_static/theme_overrides.css?v=52e7e328" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=47a5c9ec"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/translations.js?v=90965dfc"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyPSA-ZA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data_workflow.html">Data used by the model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../wildcards.html">Wildcards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../costs.html">Cost Assumptions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference (automated)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to_contribute.html">Сontribute</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyPSA-ZA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/archive/tutorials.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial">
+<span id="id1"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading"></a></h1>
+<p>Before getting started with <strong>PyPSA-ZA</strong> it makes sense to be familiar
+with its general modelling framework <a class="reference external" href="https://pypsa.readthedocs.io">PyPSA</a>.</p>
+<p>The tutorial uses fewer computing resources than the entire model, allowing the user to explore
+the majority of its features on a local computer.</p>
+<p>If not yet completed, follow the <a class="reference internal" href="../installation.html#installation"><span class="std std-ref">Installation</span></a> steps first.</p>
+<p>The tutorial will cover examples on how to</p>
+<ul class="simple">
+<li><p>configure and customise the PyPSA-ZA model and</p></li>
+<li><p>step-by-step exucetion of the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> workflow, from network creation through solving the network to analysing the results.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">model_file.xlsx</span></code> and <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> files are utilised to customise the PyPSA-ZA model. The tutorial’s configuration is contained in
+<code class="docutils literal notranslate"><span class="pre">model_file_tutorial.xlsx</span></code> and <code class="docutils literal notranslate"><span class="pre">config.tutorial.yaml</span></code>. Use the configuration and model setup files <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">model_file.xlsx</span></code> to run the tutorial</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../pypsa-za<span class="w"> </span>%<span class="w"> </span>cp<span class="w"> </span>config.tutorial.yaml<span class="w"> </span>config.yaml
+.../pypsa-za<span class="w"> </span>%<span class="w"> </span>cp<span class="w"> </span>model_file_tutorial.xlsx<span class="w"> </span>model_file.xlsx
+</pre></div>
+</div>
+<section id="how-to-customise-pypsa-za">
+<h2>How to customise PyPSA-ZA?<a class="headerlink" href="#how-to-customise-pypsa-za" title="Permalink to this heading"></a></h2>
+<section id="model-setup-model-file-xlsx">
+<h3>Model setup: model_file.xlsx<a class="headerlink" href="#model-setup-model-file-xlsx" title="Permalink to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">model_file.xlsx</span></code> contains databases of existing conventional and renewable power stations owned by Eskom or by IPP’s.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>existing Eskom stations</dt><dd><ul>
+<li><dl class="simple">
+<dt>scenario</dt><dd><ul>
+<li><p>power station name</p></li>
+<li><p>carrier</p></li>
+<li><p>carrier type</p></li>
+<li><p>status</p></li>
+<li><p>capacity (MW)</p></li>
+<li><p>unit size (MW)</p></li>
+<li><p>number of units</p></li>
+<li><p>future commissioning date</p></li>
+<li><p>decommissioning date</p></li>
+<li><p>heat rate (GJ/MWh)</p></li>
+<li><p>fuel price (R/GJ)</p></li>
+<li><p>max ramp up (MW/min)</p></li>
+<li><p>max ramp down (MW/min)</p></li>
+<li><p>min stable level (%)</p></li>
+<li><p>variable O&amp;M cost (R/MWh)</p></li>
+<li><p>fixed O&amp;M cost (R/MWh)</p></li>
+<li><p>pump efficiency (%)</p></li>
+<li><p>pump units</p></li>
+<li><p>pump load per unit (MW)</p></li>
+<li><p>pumped storage - max storage (GWh)</p></li>
+<li><p>csp storage (hours)</p></li>
+<li><p>diesel storage (Ml)</p></li>
+<li><p>gas storage (MCM)</p></li>
+<li><p>GPS latitude</p></li>
+<li><p>GPS longitude</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>existing non-Eskom stations</dt><dd><ul>
+<li><dl class="simple">
+<dt>scenario</dt><dd><ul>
+<li><p>same as above, in addition:</p></li>
+<li><p>grouping</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>new build limits</dt><dd><ul>
+<li><dl class="simple">
+<dt>scenario</dt><dd><ul>
+<li><p>minimum installed limit</p></li>
+<li><p>maximum installed limit</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>projected parameters</dt><dd><ul>
+<li><dl class="simple">
+<dt>scenario</dt><dd><ul>
+<li><p>demand</p></li>
+<li><p>coal fleet energy availability factor (EAF)</p></li>
+<li><p>spinning reserves</p></li>
+<li><p>total reserves</p></li>
+<li><p>reserve margin</p></li>
+<li><p>active reserve margin</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>technology costs</dt><dd><ul>
+<li><dl class="simple">
+<dt>scenario</dt><dd><ul>
+<li><p>discount rate</p></li>
+<li><p>heat rate</p></li>
+<li><p>efficiency</p></li>
+<li><p>fixed O&amp;M</p></li>
+<li><p>variable O&amp;M</p></li>
+<li><p>investment</p></li>
+<li><p>lifetime</p></li>
+<li><p>fuel</p></li>
+<li><p>CO2 intensity</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>model setup</dt><dd><ul>
+<li><p>wildcard</p></li>
+<li><p>simulation years</p></li>
+<li><p>scenario: existing Eskom stations</p></li>
+<li><p>scenario: existing non-Eskom stations</p></li>
+<li><p>scenario: new build limits</p></li>
+<li><p>scenario: projected parameters</p></li>
+<li><p>scenario: costs</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="configuration-config-yaml">
+<h3>Configuration: config.yaml<a class="headerlink" href="#configuration-config-yaml" title="Permalink to this heading"></a></h3>
+<p>The model can be further adapted using the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> to only include a select number of <code class="docutils literal notranslate"><span class="pre">regions</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">1-supply</span></code>, <code class="docutils literal notranslate"><span class="pre">11-supply</span></code> or <code class="docutils literal notranslate"><span class="pre">27-supply</span></code>). The tutorial is setup to run the
+<code class="docutils literal notranslate"><span class="pre">1-supply</span></code> which uses a single node for the entire country.</p>
+<p>The model uses the <code class="docutils literal notranslate"><span class="pre">regions</span></code> selected to determine the network topology. When the option <code class="docutils literal notranslate"><span class="pre">build_topology</span></code> is enabled, the model constructs the network topology. It is necessary to enable this
+when running the model for the first time or when changing the <code class="docutils literal notranslate"><span class="pre">regions</span></code> tag.</p>
+<p>PyPSA-ZA provides three methods for generating renewable resource data. The tag <code class="docutils literal notranslate"><span class="pre">use_eskom_wind_solar</span></code> uses the pu profiles for all wind and solar generators as obtained from Eskom. The
+tag <code class="docutils literal notranslate"><span class="pre">use_excel_wind_solar</span></code> utilises user specific hourly pu profiles provided in an excel spreadsheet. The tag <code class="docutils literal notranslate"><span class="pre">build_renewables_profiles</span></code> enables the model to calculate the temporal and
+spatial availability of renewables such as wind and solar energy using historical weather data.</p>
+<p>For either three methods historical weather data is used and thus the year in which the data was obtained is specified for each carrier under the tag <code class="docutils literal notranslate"><span class="pre">reference_weather_years</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">build_renewables_profiles</span></code> is enabled then <code class="docutils literal notranslate"><span class="pre">atlite</span></code> is used to generate the renewable resource potential using reanalysis data which can be
+downloaded by enabling the <code class="docutils literal notranslate"><span class="pre">build_cutout</span></code> tag.</p>
+<p>The cutout is is configured under the <code class="docutils literal notranslate"><span class="pre">atlite</span></code> tag. The options below can be adapted to download weather data for the required range of coordinates surrounding South Africa.
+For more details on <code class="docutils literal notranslate"><span class="pre">atlite</span></code> please follow the <a class="reference external" href="https://atlite.readthedocs.io/en/latest/examples/create_cutout.html">tutorials</a>.</p>
+<p>The spatial resolution of the downloaded ERA5 dataset is given on a 30km x 30km grid. For wind power generation, this spatial resolution is  not enough to resolve the local
+dynamics. Enabling the <code class="docutils literal notranslate"><span class="pre">apply_wind_correction</span></code> tag, uses global wind atlas mean wind speed at 100m to correct the ERA5 data.</p>
+<p>Once the historical weather data is downloaded, <code class="docutils literal notranslate"><span class="pre">atlite</span></code> is used to convert the weather data to power systems data. Atlite uses pre-defined or custom turbine properties
+which are specified under the <code class="docutils literal notranslate"><span class="pre">resource</span></code> tag.</p>
+<p>Similarly, solar pv profiles are generated using pre-defined or custom panel properties which are specified under the <code class="docutils literal notranslate"><span class="pre">resource</span></code> tag.</p>
+<p>The renewable potentials are calculated for eligible land, excluding the conservation and protected areas. When the <code class="docutils literal notranslate"><span class="pre">natura</span></code> tag is enabled, the SACAD and SAPAD shape files located in <cite>data/bundle</cite> are
+converted into <code class="docutils literal notranslate"><span class="pre">tiff</span></code> files. The conservation and protectected areas together with the areas of land with the <code class="docutils literal notranslate"><span class="pre">grid_codes</span></code> specified are excluded from calculation of renewable potential.</p>
+<p>In addition, the expansion of renewable resources is limited to either the <code class="docutils literal notranslate"><span class="pre">redz</span></code> regions or areas close to the strategic transmission <code class="docutils literal notranslate"><span class="pre">corridors</span></code>.</p>
+<p>The hydro power is obtained directly from Eskom data.</p>
+<p>Finally, it is possible to pick a solver. For instance, this tutorial uses the open-source solvers CBC and Ipopt and does not rely
+on the commercial solvers Gurobi or CPLEX (for which free academic licenses are available).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To run the tutorial, either install CBC and Ipopt (see instructions for <a class="reference internal" href="../installation.html#installation"><span class="std std-ref">Installation</span></a>).</p>
+<p>Alternatively, choose another installed solver in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> at <code class="docutils literal notranslate"><span class="pre">solving:</span> <span class="pre">solver:</span></code>.</p>
+</div>
+<p>Note, that we only note major changes to the provided default configuration that is comprehensibly documented in <a class="reference internal" href="../configuration.html#config"><span class="std std-ref">Configuration</span></a>.
+There are many more configuration options beyond what is adapted for the tutorial!</p>
+<p>A good starting point to customize your model are settings of the default configuration file <cite>config.default</cite>. You may want to do a reserve copy of your current configuration file and then overwrite it by a default configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../pypsa-za<span class="w"> </span><span class="o">(</span>pypsa-za<span class="o">)</span><span class="w"> </span>%<span class="w"> </span>cp<span class="w"> </span>config.default.yaml<span class="w"> </span>config.yaml
+</pre></div>
+</div>
+</section>
+</section>
+<section id="how-to-execute-different-parts-of-the-workflow">
+<h2>How to execute different parts of the workflow?<a class="headerlink" href="#how-to-execute-different-parts-of-the-workflow" title="Permalink to this heading"></a></h2>
+<p>Snakemake is a workflow management tool inherited by PyPSA-ZA from PyPSA-Eur.
+Snakemake decomposes a large software process into a set of subtasks, or ’rules’, that are automatically chained to obtain the desired output.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">Snakemake</span></code>, which is one of the major dependencies, will be automatically installed in the environment pypsa-za, thereby there is no need to install it manually.</p>
+</div>
+<p>The snakemake included in the conda environment pypsa-za can be used to execute any custom rule with the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../pypsa-za<span class="w"> </span><span class="o">(</span>pypsa-za<span class="o">)</span><span class="w"> </span>%<span class="w"> </span>snakemake<span class="w"> </span>&lt;<span class="w"> </span>your<span class="w"> </span>custom<span class="w"> </span>rule<span class="w"> </span>&gt;
+</pre></div>
+</div>
+<p>Starting with essential usability features, the implemented PyPSA-ZA <a class="reference external" href="https://github.com/PyPSA/pypsa-za/blob/master/Snakefile">Snakemake procedure</a> that
+allows to flexibly execute the entire workflow with various options without writing a single line of python code. For instance, you can model South Africa’s energy system
+using the required data. Wildcards, which are special generic keys that can assume multiple values depending on the configuration options,
+help to execute large workflows with parameter sweeps and various options.</p>
+<p>You can execute some parts of the workflow in case you are interested in some specific it’s parts.
+E.g. renewable resource potentials for onshore wind in <code class="docutils literal notranslate"><span class="pre">redz</span></code> areas for a single node model may be generated with the following command which refers to the script name:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../pypsa-earth<span class="w"> </span><span class="o">(</span>pypsa-earth<span class="o">)</span><span class="w"> </span>%<span class="w"> </span>snakemake<span class="w"> </span>-j<span class="w"> </span><span class="m">1</span><span class="w"> </span>resources/profile_onwind_1-supply_redz.nc
+</pre></div>
+</div>
+</section>
+<section id="how-to-use-pypsa-za-for-your-energy-problem">
+<h2>How to use PyPSA-ZA for your energy problem?<a class="headerlink" href="#how-to-use-pypsa-za-for-your-energy-problem" title="Permalink to this heading"></a></h2>
+<p>PyPSA-ZA mostly relies on <a class="reference internal" href="../data_workflow.html#data-workflow"><span class="std std-ref">input datasets</span></a> specific to South Africa but can be tailored to represent any part of the world in a few steps. The following procedure is recommended.</p>
+<section id="adjust-the-model-configuration">
+<h3>1. Adjust the model configuration<a class="headerlink" href="#adjust-the-model-configuration" title="Permalink to this heading"></a></h3>
+<p>The main parameters needed to customize the inputs for your national-specific data are defined in the <a class="reference internal" href="../configuration.html#config"><span class="std std-ref">configuration</span></a> file <cite>config.yaml</cite>.
+The configuration settings should be adjusted according to a particular problem you are intending to model. The main country-dependent parameters are:</p>
+<ul class="simple">
+<li><p><cite>regions</cite> parameter which defines the network topology;</p></li>
+<li><p><cite>resareas</cite> parameter which defines zones suitable for renewable expansion based on country specific policies;</p></li>
+<li><p><cite>cutouts</cite> and <cite>cutout</cite> parameters which refer to a name of the climate data archive (so called <a class="reference external" href="https://atlite.readthedocs.io/en/latest/ref_api.html#cutout">cutout</a>)</p></li>
+</ul>
+<p>to be used for calculation of the renewable potential.</p>
+<p>Apart of that, it’s worth to check that there is a proper match between the temporal and spatial parameters across the configuration file as it is essential to build the model properly.
+Generally, if there are any mysterious error message appearing during the first model run, there are chances that it can be resolved by a simple config check.</p>
+<p>It could be helpful to keep in mind the following points:</p>
+<ol class="arabic simple">
+<li><p>the cutout name should be the same across the whole configuration file (there are several entries, one under <cite>atlite</cite> and some under each of the <cite>renewable</cite> parameters);</p></li>
+<li><p>the country of interest given as a shape file in <cite>data/supply_regions/</cite> should be covered by the cutout area;</p></li>
+<li><p>the cutout time dimension, the weather year used for demand modelling and the actual snapshot should match.</p></li>
+</ol>
+</section>
+<section id="build-the-custom-cutout">
+<h3>2. Build the custom cutout<a class="headerlink" href="#build-the-custom-cutout" title="Permalink to this heading"></a></h3>
+<p>The cutout is the main concept of climate data management in PyPSA ecosystem introduced in <a class="reference external" href="https://atlite.readthedocs.io/en/latest/">atlite</a> package.
+The cutout is an archive containing a spatio-temporal subset of one or more topology and weather datasets. Since such datasets are typically global
+and span multiple decades, the Cutout class allows atlite to reduce the scope to a more manageable size. More details about the climate data processing
+concepts are contained in <a class="reference external" href="https://joss.theoj.org/papers/10.21105/joss.03294">JOSS paper</a>.</p>
+<p>The pre-built cutout for South Africa is available for 2012 year and can be loaded directly from zenodo through the rule <cite>retrieve_cutout</cite>.</p>
+<p>In case you are interested in other parts of the world you have to generate a cutout yourself using the <cite>build_cutouts</cite> rule. To run it you will need to:</p>
+<ol class="arabic simple">
+<li><p>be registered on  the <a class="reference external" href="https://cds.climate.copernicus.eu">Copernicus Climate Data Store</a>;</p></li>
+<li><p>install <cite>cdsapi</cite> package  (can be installed with <cite>pip</cite>);</p></li>
+<li><p>setup your CDS API key as described <a class="reference external" href="https://cds.climate.copernicus.eu/api-how-to">on their website</a>.</p></li>
+</ol>
+<p>These steps are required to use CDS API which allows an automatic file download while executing <cite>build_cutouts</cite> rule.</p>
+<p>Normally cutout extent is calculated from the shape of the requested region defined by the <cite>countries</cite> parameter in the configuration file <cite>config.yaml</cite>.
+It could make sense to set the countries list as big as it’s feasible when generating a cutout. A considered area can be narrowed anytime when building
+a specific model by adjusting content of the <cite>countries</cite> list.</p>
+<p>There is also option to set the cutout extent specifying <cite>x</cite> and <cite>y</cite> values directly. However, these values will overwrite values extracted from the countries
+shape. Which means that nothing prevents <cite>build_cutout</cite> to extract data which has no relation to the requested countries. Please use direct definition of <cite>x</cite>
+and <cite>y</cite> only if you really understand what and why you are doing.</p>
+<p>The <cite>build_cutout</cite> flag should be set <cite>true</cite> to generate the cutout. After the cutout is ready, it’s recommended to set <cite>build_cutout</cite> to <cite>false</cite> to avoid overwriting the existing cutout by accident.</p>
+</section>
+<section id="build-a-natura-tiff-raster">
+<h3>3. Build a natura.tiff raster<a class="headerlink" href="#build-a-natura-tiff-raster" title="Permalink to this heading"></a></h3>
+<p>A raster file <cite>natura.tiff</cite> is used to store shapes of the protected and reserved nature areas. Such landuse restrictions can be taking into account when calculating the
+renewable potential with <cite>build_renewable_profiles</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Skip this recommendation if the region of your interest is within Africa</p>
+</div>
+<p>A pre-built <cite>natura.tiff</cite> is loaded along with other data needed to run a model with <cite>retrieve_databundle_light</cite> rule. Currently this raster is valid for Africa,
+global <cite>natura.tiff</cite> raster is under development. You may generate the <cite>natura.tiff</cite> for a region of interest using <cite>build_natura_raster</cite> rule which aggregates
+data on protected areas along the cutout extent.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Meridian Economics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

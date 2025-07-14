@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en-GB">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; PyPSA-ZA  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="_static/theme_overrides.css?v=52e7e328" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=47a5c9ec"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="_static/translations.js?v=90965dfc"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Workflow" href="workflow.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PyPSA-ZA
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#clone-the-repository">Clone the Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-python-dependencies">Install Python Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-data-dependencies">Download Data Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-a-solver">Install a Solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-up-the-default-configuration">Set Up the Default Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_workflow.html">Data used by the model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="wildcards.html">Wildcards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="costs.html">Cost Assumptions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference (automated)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to_contribute.html">Сontribute</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyPSA-ZA</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
+<p>The subsequently described installation steps are demonstrated as shell commands, where the path before the % sign denotes the directory in which the commands following the % should be entered.</p>
+<section id="clone-the-repository">
+<h2>Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Permalink to this heading"></a></h2>
+<p>First of all, clone the <a class="reference external" href="https://github.com/MeridianEconomics/pypsa-rsa.git">PyPSA-RSA repository</a> using the version control system <code class="docutils literal notranslate"><span class="pre">git</span></code>.
+The path to the directory into which the <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">repository</span></code> is cloned, must <strong>not</strong> have any spaces!
+If you do not have <code class="docutils literal notranslate"><span class="pre">git</span></code> installed, follow installation instructions <a class="reference external" href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">here</a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/some/other/path<span class="w"> </span>%<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/some/path/without/spaces
+/some/path/without/spaces<span class="w"> </span>%<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MeridianEconomics/pypsa-rsa.git
+</pre></div>
+</div>
+</section>
+<section id="install-python-dependencies">
+<span id="deps"></span><h2>Install Python Dependencies<a class="headerlink" href="#install-python-dependencies" title="Permalink to this heading"></a></h2>
+<p>PyPSA-RSA relies on a set of other Python packages to function.
+We recommend using the package manager and environment management system <code class="docutils literal notranslate"><span class="pre">conda</span></code> to install them.
+Install <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">miniconda</a>, which is a mini version of <a class="reference external" href="https://www.anaconda.com/">Anaconda</a>
+that includes only <code class="docutils literal notranslate"><span class="pre">conda</span></code> and its dependencies or make sure <code class="docutils literal notranslate"><span class="pre">conda</span></code> is already installed on your system.
+For instructions for your operating system follow the <code class="docutils literal notranslate"><span class="pre">conda</span></code> <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/">installation guide</a>.</p>
+<p>The python package requirements are curated in the <a class="reference external" href="https://github.com/MeridianEconomics/pypsa-rsa/blob/master/envs/environment.yaml">envs/environment.yaml</a> file.</p>
+<p>The environment can be installed and activated using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../pypsa-rsa<span class="w"> </span>%<span class="w"> </span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yaml
+.../pypsa-rsa<span class="w"> </span>%<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>pypsa-rsa
+</pre></div>
+</div>
+<p>Note that activation is local to the currently open shell!
+After opening a new terminal window, one needs to reissue the second command!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have troubles with a slow <code class="docutils literal notranslate"><span class="pre">conda</span></code> installation, we recommend to install
+<a class="reference external" href="https://github.com/QuantStack/mamba">mamba</a> as a fast drop-in replacement via</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>mamba
+</pre></div>
+</div>
+<p>and then install the environment with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>envs/environment.yaml
+</pre></div>
+</div>
+</div>
+</section>
+<section id="download-data-dependencies">
+<h2>Download Data Dependencies<a class="headerlink" href="#download-data-dependencies" title="Permalink to this heading"></a></h2>
+<p>For ease of installation and reproduction we provide a bundle pypsa-za-bundle.7z with the necessary data files.
+To obtain and unpack the data bundle in the data folder</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../data<span class="w"> </span>%<span class="w"> </span>wget<span class="w"> </span><span class="s2">&quot;https://vfs.fias.science/d/f204668ef2/files/?dl=1&amp;p=/pypsa-za-bundle.7z&quot;</span>
+.../data<span class="w"> </span>%<span class="w"> </span>7z<span class="w"> </span>x<span class="w"> </span>pypsa-za-bundle.7z
+</pre></div>
+</div>
+</section>
+<section id="install-a-solver">
+<h2>Install a Solver<a class="headerlink" href="#install-a-solver" title="Permalink to this heading"></a></h2>
+<p>PyPSA passes the PyPSA-RSA network model to an external solver for performing a total annual system cost minimization with optimal power flow.
+PyPSA is known to work with the free software</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://coin-or.github.io/Ipopt/INSTALL.html">Ipopt</a></p></li>
+<li><p><a class="reference external" href="https://projects.coin-or.org/Cbc#DownloadandInstall">Cbc</a></p></li>
+<li><p><a class="reference external" href="https://www.gnu.org/software/glpk/">GLPK</a> (<a class="reference external" href="http://winglpk.sourceforge.net/">WinGLKP</a>)</p></li>
+<li><p><a class="reference external" href="https://highs.dev/">HiGHS</a></p></li>
+</ul>
+<p>For installation instructions of these solvers for your operating system, follow the links above.
+Commercial solvers such as Gurobi and CPLEX currently significantly outperform open-source solvers for large-scale problems.
+It might be the case that you can only retrieve solutions by using a commercial solver.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The rules <code class="xref py py-mod docutils literal notranslate"><span class="pre">cluster_network</span></code> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">simplify_network</span></code> solve a quadratic optimisation problem for clustering.
+The open-source solvers Cbc and GlPK cannot handle this. A fallback to Ipopt is implemented in this case, but requires
+also Ipopt to be installed. For an open-source solver setup install in your <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment on OSX/Linux</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>pypsa-rsa
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>ipopt<span class="w"> </span>coincbc
+</pre></div>
+</div>
+<p>and on Windows</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>pypsa-rsa
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>ipopt<span class="w"> </span>glpk
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>On Windows, new versions of <code class="docutils literal notranslate"><span class="pre">ipopt</span></code> have caused problems. Consider downgrading to version 3.11.1.</p>
+</div>
+</section>
+<section id="set-up-the-default-configuration">
+<span id="defaultconfig"></span><h2>Set Up the Default Configuration<a class="headerlink" href="#set-up-the-default-configuration" title="Permalink to this heading"></a></h2>
+<p>PyPSA-RSA has several configuration options that must be specified in a <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file located in the root directory.
+An example configuration <code class="docutils literal notranslate"><span class="pre">config.default.yaml</span></code> is maintained in the repository.
+More details on the configuration options are in <a class="reference internal" href="configuration.html#config"><span class="std std-ref">Configuration</span></a>.</p>
+<p>Before first use, create a <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> by copying the example.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.../pypsa-za<span class="w"> </span>%<span class="w"> </span>cp<span class="w"> </span>config.default.yaml<span class="w"> </span>config.yaml
+</pre></div>
+</div>
+<p>Users are advised to regularly check their own <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> against changes in the <code class="docutils literal notranslate"><span class="pre">config.default.yaml</span></code>
+when pulling a new version from the remote repository.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="workflow.html" class="btn btn-neutral float-right" title="Workflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Meridian Economics.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

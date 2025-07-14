@@ -165,8 +165,9 @@ This will show up as a list of jobs that are executed in the terminal, and the o
 How to analyse results?
 ===============================================
 The results of the model can be analysed in a Jupyter notebook as: 
-.. code:: python
 
+.. code:: python
+    
     import pypsa
     n = pypsa.Network("results/ME IRP 2024/network/capacity-IRP_REF_CI.nc")
 

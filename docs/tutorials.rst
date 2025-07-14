@@ -98,7 +98,7 @@ on the commercial solvers Gurobi or CPLEX (for which free academic licenses are 
 .. literalinclude:: ../config.yaml
    :language: yaml
    :start-at: solving:
-   :end-before: bargapstop:
+   :end-before: Crossover:
 
 .. note::
 

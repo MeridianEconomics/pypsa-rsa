@@ -44,10 +44,10 @@ Scenarios are defined via spreadsheet inputs in the directory:
 Key input files include:
 
 - `annual_load.xlsx`: Annual load (TWh/year) from 2019–2050 (e.g., IRP 2023, CSIR-Meridian Ambitions)
-- `carbon_constraints.xlsx`: CO₂ constraints (Mt/year)
-- `extendable_technologies.xlsx`: Expandable tech (e.g., solar, wind)
-- `fixed_technologies.xlsx`: Fixed tech (e.g., coal, gas)
-- `operational_constraints.xlsx`: Tech constraints (e.g., capacity factors)
+- `carbon_constraints.xlsx`: CO₂ emissions limits (Mt/year)
+- `extendable_technologies.xlsx`: New build generation and storage technologies
+- `fixed_technologies.xlsx`: Existing generation and storage technologies
+- `operational_constraints.xlsx`: Technology new build constraints, gas contracting, security of supply and system adequacy
 - `plant_availability.xlsx`: Generator availability
 - `reserve_margin.xlsx`: Reserve requirements
 - `transmission_expansion.xlsx`: Transmission expansion plans
@@ -78,6 +78,7 @@ Within the configuration file, the crs (coordinate reference system) section def
 Relevant year data to the model such as the reference load year and reference weather years are defined in the configuration file. 
 
 The reference load year is used to define the load profile for the model, while the reference weather years are used to define the renewable resource profiles.
+The number of years analysed can also be changed, for instance, using 2-year increments over a given time horizon.
 
 .. literalinclude:: ../config.yaml
     :language: yaml

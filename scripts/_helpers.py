@@ -554,19 +554,32 @@ def mock_snakemake(rulename, **wildcards):
     import os
 
     import snakemake as sm
-    from pypsa.descriptors import Dict
+    try:
+        from pypsa.descriptors import Dict
+    except:
+        from pypsa.definitions.structures import Dict
     from snakemake.script import Snakemake
+    from snakemake.script import Snakemake
+    from snakemake.common import SNAKEFILE_CHOICES
+    from snakemake.api import Workflow
+    from snakemake.settings.types import (
+        ConfigSettings,
+        DAGSettings,
+        ResourceSettings,
+        StorageSettings,
+        WorkflowSettings,
+    )
 
     script_dir = Path(__file__).parent.resolve()
     assert (
         Path.cwd().resolve() == script_dir
     ), f"mock_snakemake has to be run from the repository scripts directory {script_dir}"
     os.chdir(script_dir.parent)
-    for p in sm.SNAKEFILE_CHOICES:
+    for p in SNAKEFILE_CHOICES:
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = sm.Workflow(snakefile, overwrite_configfiles=[], rerun_triggers=[])
+    workflow = Workflow(ConfigSettings(configfiles=[]), ResourceSettings(), WorkflowSettings(), StorageSettings(), DAGSettings(rerun_triggers=[]), storage_provider_settings=dict())   
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
@@ -720,8 +733,8 @@ def save_to_geojson(df, fn):
     # save file if the GeoDataFrame is non-empty
     if df.shape[0] > 0:
         df = df.reset_index()
-        schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-        df.to_file(fn, driver="GeoJSON", schema=schema)
+        # schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
+        df.to_file(fn, driver="GeoJSON") # schema=schema)
     else:
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:
@@ -818,7 +831,7 @@ def apply_default_attr(df, attrs):
     default_attrs = attrs[["default","type"]]
     default_list = default_attrs.loc[default_attrs.index.isin(params), "default"].dropna().index
 
-    conv_type = {'int': int, 'float': float, "static or series": float, "series": float}
+    conv_type = {'int': int, 'float': float, "static or series": float, "series": float, 'boolean': bool, 'string': str}
     for attr in default_list:
         default = default_attrs.loc[attr, "default"]
         df[attr] = df[attr].fillna(conv_type[default_attrs.loc[attr, "type"]](default))

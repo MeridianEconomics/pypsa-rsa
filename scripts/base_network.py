@@ -146,7 +146,7 @@ def get_years():
     years = scenario_setup.loc["simulation_years"]
 
     if not isinstance(years, int):
-        years = list(map(int, re.split(",\s*", years)))
+        years = list(map(int, re.split(r",\s*", years)))
         if snakemake.wildcards.model_type == "dispatch":
             years = list(range(2024, np.max(years) + 1)) 
         n.multi_invest = 1

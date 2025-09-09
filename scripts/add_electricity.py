@@ -213,7 +213,7 @@ def load_extendable_parameters(n, scenario_setup, snakemake):
     param = full_param.copy()
 
     # Get entries where FOM is specified as % of CAPEX
-    fom_perc_capex=param.loc[param.unit.str.contains("\%capex/year") == True, param_yr]
+    fom_perc_capex=param.loc[param.unit.str.contains(r"\%capex/year") == True, param_yr]
     fom_perc_capex_idx=fom_perc_capex.index.get_level_values(1)
 
     add_param = pd.DataFrame(
@@ -660,8 +660,8 @@ def map_components_to_buses(component_df, regions, crs_config):
         index=component_df.index, 
         crs=crs_config["geo_crs"]
     ).to_crs(crs_config["distance_crs"]))
-    joined = gpd.sjoin(gps_gdf, regions_gdf, how="left", op="within")
-    component_df["bus"] = joined["index_right"].copy()
+    joined = gpd.sjoin(gps_gdf, regions_gdf, how="left", predicate="within")
+    component_df["bus"] = joined.name.copy()
 
     if empty_bus := list(component_df[~component_df["bus"].notnull()].index):
         logger.warning(f"Dropping generators/storage units with no bus assignment {empty_bus}")
@@ -1201,7 +1201,7 @@ if __name__ == "__main__":
             "add_electricity", 
             **{
                 "model_type":"capacity",
-                "scenario":"AMBITIONS_LC2",
+                "scenario":"IRP_REF_CI",
             }
         )
 
@@ -1272,4 +1272,5 @@ if __name__ == "__main__":
             n_y = single_year_network_copy(n, snapshots=sns, investment_periods=sns.unique("period"))
             n_y.export_to_netcdf(f"{scenario_path}/dispatch_{y}.nc") 
     else:
+        n.generators_t.p_max_pu = n.get_switchable_as_dense("Generator", "p_max_pu").astype(float)
         n.export_to_netcdf(snakemake.output[0])

@@ -11,7 +11,6 @@ Prepare PyPSA network for solving according to :ref:`opts` and :ref:`ll`, such a
 - specifying an expansion limit on the **volume** of transmission expansion, and
 - reducing the **temporal** resolution by averaging over multiple hours
   or segmenting time series into chunks of varying lengths using ``tsam``.
-  
 
 Relevant Settings
 -----------------
@@ -56,23 +55,24 @@ Description
 import logging
 import re
 
+from linopy import LinearExpression, Variable, merge
 import numpy as np
 import pandas as pd
 import pypsa
-# from pypsa.linopt import get_var, write_objective, define_constraints, linexpr
-from pypsa.descriptors import get_switchable_as_dense as get_as_dense, expand_series
+from pypsa.descriptors import get_switchable_as_dense as get_as_dense, expand_series, get_activity_mask
 from pypsa.optimization.common import reindex
 
 from _helpers import configure_logging, remove_leap_day, normalize_and_rename_df, assign_segmented_df_to_network, load_scenario_definition
-from add_electricity import load_extendable_parameters#, update_transmission_costs
-from concurrent.futures import ProcessPoolExecutor
+from add_electricity import load_extendable_parameters, apply_time_segmentation#, update_transmission_costs
 import xarray as xr
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning) # Comment out for debugging and development
-from custom_constraints import set_operational_limits, ccgt_steam_constraints, reserve_margin_constraints, annual_co2_constraints
+from custom_constraints import set_operational_limits, ccgt_steam_constraints, reserve_margin_constraints, add_annual_co2_constraints
 idx = pd.IndexSlice
 import os
+from add_electricity import check_pu_profiles
 
+from xarray import DataArray
 """
 ********************************************************************************
     Build limit constraints
@@ -91,10 +91,10 @@ def set_extendable_limits_global(n):
     for lim in ["max", "min"]:
         try:
             global_limit = pd.read_excel(
-                os.path.join(scenario_setup["sub_path"], "extendable_technologies.xlsx"),
+                os.path.join(SCENARIO_SETUP["sub_path"], "extendable_technologies.xlsx"),
                 sheet_name=f'{lim}_total_installed',
                 index_col=[0, 1, 3, 2, 4],
-            ).loc[(scenario_setup[f"extendable_{lim}_total"], "global", slice(None), slice(None)), ext_years]
+            ).loc[(SCENARIO_SETUP[f"extendable_{lim}_total"], "global", slice(None), slice(None)), ext_years]
             # If successfully read, add to the global_limits dictionary
             global_limits[lim] = global_limit
         except Exception:
@@ -122,18 +122,24 @@ def set_extendable_limits_global(n):
             n.add("GlobalConstraint", **constraint)
 
 
+
+
 def set_extendable_limits_per_bus(n):
     ext_years = n.investment_periods if n.multi_invest else [n.snapshots[0].year]
     ignore = {"max": "unc", "min": 0}
 
-    bus_limits = {
-        lim: pd.read_excel(
-            os.path.join(scenario_setup["sub_path"], "extendable_technologies.xlsx"),
-            sheet_name=f'{lim}_total_installed',
-            index_col=[0, 1, 3, 2, 4],
-        ).loc[(scenario_setup[f"extendable_{lim}_total"], scenario_setup["regions"], slice(None)), ext_years]
-        for lim in ["max", "min"]
-    }
+    try:
+        bus_limits = {
+            lim: pd.read_excel(
+                os.path.join(SCENARIO_SETUP["sub_path"], "extendable_technologies.xlsx"),
+                sheet_name=f'{lim}_total_installed',
+                index_col=[0, 1, 3, 2, 4],
+            ).loc[(SCENARIO_SETUP[f"extendable_{lim}_total"], SCENARIO_SETUP["regions"], slice(None)), ext_years]
+            for lim in ["max", "min"]
+        }
+    except:
+        logging.warning("No regional extendable limits found in model file. Skipping.")
+        return
 
     ext_carriers = (
         list(n.generators.carrier[n.generators.p_nom_extendable].unique())
@@ -156,225 +162,332 @@ def set_extendable_limits_per_bus(n):
 ********************************************************************************
 """
 
-
-def add_emission_prices(n, emission_prices=None, exclude_co2=False):
-    if emission_prices is None:
-        emission_prices = snakemake.config["costs"]["emission_prices"]
-    if exclude_co2: emission_prices.pop("co2")
-    ep = (pd.Series(emission_prices).rename(lambda x: x+"_emissions") * n.carriers).sum(axis=1)
-    n.generators["marginal_cost"] += n.generators.carrier.map(ep)
-    n.storage_units["marginal_cost"] += n.storage_units.carrier.map(ep)
-
-# """
-# ********************************************************************************
-#     Transmission constraints
-# ********************************************************************************
-# """
-
-# def set_line_s_max_pu(n):
-#     s_max_pu = snakemake.config["lines"]["s_max_pu"]
-#     n.lines["s_max_pu"] = s_max_pu
-#     logger.info(f"N-1 security margin of lines set to {s_max_pu}")
-
-
-# def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
-#     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
-
-#     _lines_s_nom = (
-#         np.sqrt(3)
-#         * n.lines.type.map(n.line_types.i_nom)
-#         * n.lines.num_parallel
-#         * n.lines.bus0.map(n.buses.v_nom)
-#     )
-#     lines_s_nom = n.lines.s_nom.where(n.lines.type == "", _lines_s_nom)
-
-#     col = "capital_cost" if ll_type == "c" else "length"
-#     ref = (
-#         lines_s_nom @ n.lines[col]
-#         + n.links.loc[links_dc_b, "p_nom"] @ n.links.loc[links_dc_b, col]
-#     )
-
-#     update_transmission_costs(n, costs)
-
-#     if factor == "opt" or float(factor) > 1.0:
-#         n.lines["s_nom_min"] = lines_s_nom
-#         n.lines["s_nom_extendable"] = True
-
-#         n.links.loc[links_dc_b, "p_nom_min"] = n.links.loc[links_dc_b, "p_nom"]
-#         n.links.loc[links_dc_b, "p_nom_extendable"] = True
-
-#     if factor != "opt":
-#         con_type = "expansion_cost" if ll_type == "c" else "volume_expansion"
-#         rhs = float(factor) * ref
-#         n.add(
-#             "GlobalConstraint",
-#             f"l{ll_type}_limit",
-#             type=f"transmission_{con_type}_limit",
-#             sense="<=",
-#             constant=rhs,
-#             carrier_attribute="AC, DC",
-#         )
-#     return n
-
-# def set_line_nom_max(n, s_nom_max_set=np.inf, p_nom_max_set=np.inf):
-#     n.lines.s_nom_max.clip(upper=s_nom_max_set, inplace=True)
-#     n.links.p_nom_max.clip(upper=p_nom_max_set, inplace=True)
-
-"""
-********************************************************************************
-    Time step reduction
-********************************************************************************
-"""
-
-def average_every_nhours(n, offset):
-    logging.info(f"Resampling the network to {offset}")
-    m = n.copy()#with_time=False)
-    snapshots_unstacked = n.snapshots.get_level_values(1)
-
-    snapshot_weightings = n.snapshot_weightings.copy().set_index(snapshots_unstacked).resample(offset).sum()
-    snapshot_weightings = remove_leap_day(snapshot_weightings)
-    snapshot_weightings=snapshot_weightings[snapshot_weightings.index.year.isin(n.investment_periods)]
-    snapshot_weightings.index = pd.MultiIndex.from_arrays([snapshot_weightings.index.year, snapshot_weightings.index])
-    m.set_snapshots(snapshot_weightings.index)
-    m.snapshot_weightings = snapshot_weightings
-
-    for c in n.iterate_components():
-        pnl = getattr(m, c.list_name + "_t")
-        for k, df in c.pnl.items():
-            if not df.empty:
-                resampled = df.set_index(snapshots_unstacked).resample(offset).mean()
-                resampled = remove_leap_day(resampled)
-                resampled=resampled[resampled.index.year.isin(n.investment_periods)]
-                resampled.index = snapshot_weightings.index
-                pnl[k] = resampled
-    return m
-
-def single_year_segmentation(n, snapshots, segments, config):
-
-    p_max_pu, p_max_pu_max = normalize_and_rename_df(n.generators_t.p_max_pu, snapshots, 1, 'max')
-    load, load_max = normalize_and_rename_df(n.loads_t.p_set, snapshots, 1, "load")
-    inflow, inflow_max = normalize_and_rename_df(n.storage_units_t.inflow, snapshots, 0, "inflow")
-
-    raw = pd.concat([p_max_pu, load, inflow], axis=1, sort=False)
-
-    multi_index = False
-    if isinstance(raw.index, pd.MultiIndex):
-        multi_index = True
-        raw.index = raw.index.droplevel(0)
-        
-    y = snapshots.get_level_values(0)[0] if multi_index else snapshots[0].year
-
-    agg = tsam.TimeSeriesAggregation(
-        raw,
-        hoursPerPeriod=len(raw),
-        noTypicalPeriods=1,
-        noSegments=int(segments),
-        segmentation=True,
-        solver=config['solver'],
-    )
-
-    segmented_df = agg.createTypicalPeriods()
-    weightings = segmented_df.index.get_level_values("Segment Duration")
-    cumsum = np.cumsum(weightings[:-1])
-    
-    if np.floor(y/4)-y/4 == 0: # check if leap year and add Feb 29 
-            cumsum = np.where(cumsum >= 1416, cumsum + 24, cumsum) # 1416h from start year to Feb 29
-    
-    offsets = np.insert(cumsum, 0, 0)
-    start_snapshot = snapshots[0][1] if n.multi_invest else snapshots[0]
-    snapshots = pd.DatetimeIndex([start_snapshot + pd.Timedelta(hours=offset) for offset in offsets])
-    snapshots = pd.MultiIndex.from_arrays([snapshots.year, snapshots]) if multi_index else snapshots
-    weightings = pd.Series(weightings, index=snapshots, name="weightings", dtype="float64")
-    segmented_df.index = snapshots
-
-    segmented_df[p_max_pu.columns] *= p_max_pu_max
-    segmented_df[load.columns] *= load_max
-    segmented_df[inflow.columns] *= inflow_max
-     
-    logging.info(f"Segmentation complete for period: {y}")
-
-    return segmented_df, weightings
-
-def apply_time_segmentation(n, segments, config):
-    logging.info(f"Aggregating time series to {segments} segments.")    
-    years = n.investment_periods if n.multi_invest else [n.snapshots[0].year]
-
-    if len(years) == 1:
-        segmented_df, weightings = single_year_segmentation(n, n.snapshots, segments, config)
-    else:
-
-        with ProcessPoolExecutor(max_workers = min(len(years),config['nprocesses'])) as executor:
-            parallel_seg = {
-                year: executor.submit(
-                    single_year_segmentation,
-                    n,
-                    n.snapshots[n.snapshots.get_level_values(0) == year],
-                    segments,
-                    config
-                )
-                for year in years
-            }
-
-        segmented_df = pd.concat(
-            [parallel_seg[year].result()[0] for year in parallel_seg], axis=0
-        )
-        weightings = pd.concat(
-            [parallel_seg[year].result()[1] for year in parallel_seg], axis=0
-        )
-
-    n.set_snapshots(segmented_df.index)
-    n.snapshot_weightings = weightings   
-    
-    assign_segmented_df_to_network(segmented_df, "_load", "", n.loads_t.p_set)
-    assign_segmented_df_to_network(segmented_df, "_max", "", n.generators_t.p_max_pu)
-    assign_segmented_df_to_network(segmented_df, "_min", "", n.generators_t.p_min_pu)
-    assign_segmented_df_to_network(segmented_df, "_inflow", "", n.storage_units_t.inflow)
-
-    return n
-
-def calc_emissions(n, scenario_setup):
-
-    carrier_emissions = pd.read_excel(
-        os.path.join(scenario_setup["sub_path"], "extendable_technologies.xlsx"), 
-        sheet_name = "parameters",
-        index_col = [0,2,1],
-    ).sort_index().loc["default", "co2_emissions"].drop(["unit","source"], axis=1)
-    gens = n.generators.query("carrier in @carrier_emissions.index").index
-    efficiency = n.generators.loc[gens, "efficiency"]
-
-    co2_emissions = pd.DataFrame(index=gens, columns = n.investment_periods)
-
-    energy = n.generators_t.p[gens].groupby(level=0).sum()
+def calc_emissions(n):
+    gen_emissions = pd.read_csv(snakemake.input["generator_emissions"],index_col=[0]) # specified in kgCO2/MWh
+    energy = n.generators_t.p[gen_emissions.index].groupby(level=0).sum()
+    emissions = pd.Series(0, index = n.investment_periods)
 
     for y in n.investment_periods:
-        for gen in gens:
-            co2_emissions.loc[gen, y] = energy.loc[y, gen] * carrier_emissions.loc[n.generators.carrier[gen], y] / efficiency[gen]
+        emissions[y] = (energy.loc[y] * gen_emissions[str(y)]).sum()
 
-    return co2_emissions.sum()/1e6
+    return emissions/1e9 # Convert from kgCO2/y back to MtCO2/y
+
 
 def calc_cumulative_new_capacity(n):
-    carriers = list(n.generators.carrier.unique())+list(n.storage_units.carrier.unique())
-    new_capacity = pd.DataFrame(index=carriers, columns = [2024]+list(n.investment_periods))
-    for period in [2024]+list(n.investment_periods):
-        for carrier in n.generators.carrier.unique():
-            new_capacity.loc[carrier,period] = n.generators.p_nom_opt[(n.generators.carrier==carrier) & (n.generators.build_year<=period)].sum()
-        for carrier in n.storage_units.carrier.unique():
-            new_capacity.loc[carrier,period] = n.storage_units.p_nom_opt[(n.storage_units.carrier==carrier) & (n.storage_units.build_year<=period)].sum()    
-    return new_capacity
+    mapping = {
+        'Generator':{
+            'solar_pv':["solar_pv","solar_pv_low",'solar_pv_rooftop'],
+            'wind':['wind','wind_low'],
+            'ocgt':['ocgt_diesel','ocgt_avf','ocgt_diesel_emg','ocgt_gas','ocgt_gas_h2_40','ocgt_gas_h2_45','ocgt_gas_h2_50','sasol_gas'],
+            'ccgt_steam':['ccgt_steam'],
+        },
+        'StorageUnit':{
+            'battery':["battery_1h","battery_4h",'battery_8h'],     
+        }
+    }
+    
+    new_capacity = pd.DataFrame(0, index=n.investment_periods,columns=list(mapping["Generator"].keys()) + list(mapping["StorageUnit"].keys()))
+    exist_capacity = pd.Series(0, index=list(mapping["Generator"].keys()) + list(mapping["StorageUnit"].keys()))
 
-def solve_network(n, sns):
+    # TODO temp fix for OCGT build year in 2025 being incorrect
+    ocgt_list = ["ocgt_diesel","ocgt_avf","ocgt_diesel_emg","ocgt_gas","ocgt_gas_h2_40","ocgt_gas_h2_45","ocgt_gas_h2_50","sasol_gas"]
+    gen_list = n.generators.query("carrier in @ocgt_list & p_nom_extendable==False & build_year<=2025").index
+    n.generators.loc[gen_list,"build_year"] = 2000
+
+
+    for c in ["Generator","StorageUnit"]:
+        for carrier in mapping[c].keys():
+            y=2023
+            tech_list = mapping[c][carrier]
+            exist_capacity.loc[carrier] += n.df(c).query("carrier==@tech_list & build_year <2024").p_nom_opt.sum()
+            
+            for y in [2024] + list(n.investment_periods):
+                new_capacity.loc[y,carrier] = n.df(c).query("carrier==@tech_list & build_year==@y").p_nom_opt.sum()
+    return new_capacity,exist_capacity
+
+
+def get_capacity_value(n):
+    reserve_dual = pd.Series(0, index = n.investment_periods)
+    for y in n.investment_periods:
+        try:
+            reserve_dual.loc[y] = n.model.dual[f"reserve_margin_{y}"].values
+        except:
+            pass
+    return reserve_dual
+
+
+def add_coal_decom(n, start_limits, full_outages_pu_max):
+    """
+    Coal is decommissioned by reducing the maximum allowable status of a generator over time. 
+    p(h) <= p_nom * p_max_pu(h) * status(h) 
     
-    n.optimize.create_model(snapshots = sns, multi_investment_periods = n.multi_invest)
-    # Custom constraints
-    set_operational_limits(n, sns, scenario_setup)
-    ccgt_steam_constraints(n, sns, snakemake)
-    reserve_margin_constraints(n, sns, scenario_setup, snakemake)
+    """
+    #sign = "<=" if start_limits > 0 else "=="
+    endogenous_decom_start_year = snakemake.config["electricity"]["conventional_generators"]["endogenous_decomssioning_start_year"]
+    phased_decom = SCENARIO_SETUP["phased_decom"]
+    decom_periods = n.investment_periods[n.investment_periods >= endogenous_decom_start_year]
+    pre_decom_periods = n.investment_periods[n.investment_periods < endogenous_decom_start_year]
+
+    if phased_decom not in ["None","none","","-"]:
+        min_phased_decom = pd.read_excel(
+            os.path.join(SCENARIO_SETUP["sub_path"], "phased_decommissioning.xlsx"),
+            sheet_name="schedule",
+            index_col=[0, 1],
+        ).loc[phased_decom].round(2)
+    else:
+        min_phased_decom = None
+
+    gens_df = n.generators.query("carrier == 'coal' and not p_nom_extendable").index
+    gens_df.name = "Generator-com"
+
+    p_nom = n.generators.loc[gens_df, "p_nom"]
+    fom = n.generators.loc[gens_df, "capital_cost"]  # only FOM for existing coal fleet
+
+    # Create a retirement variable index
+    gen_retire_list=[]
+    for y in n.investment_periods:
+        active = n.get_active_assets("Generator", y)
+        gens_i = [g for g in gens_df if g in active[active]]
+        for g in gens_i:
+            gen_retire_list.append(f"{g}_{y}")
+
+    gen_retire_list = pd.Index(gen_retire_list, name="Generator-ret")
+    n.model.add_variables(lower=0, upper=1, coords=[gen_retire_list], name="Generator-p_nom_ret")
+
+    # Get references to status and retirement variables
+    status = n.model.variables["Generator-status"]
+    p_nom_ret = n.model.variables["Generator-p_nom_ret"]
+
+    # Empty list to collect terms for the objective function
+    retirement_objective_terms = []
+    retirement_objective_constant = 0
+
+
+    for y in n.investment_periods:
+        active = n.get_active_assets("Generator", y) # Only take assets that have not yet reached end of life
+
+        gens_i = [g for g in gens_df if g in active[active]] # only apply constraints if station is active
+        for gen in gens_i:
+            
+            gen_list = [f"{gen}_{y}" for y in decom_periods if f"{gen}_{y}" in gen_retire_list]
+            retired_y = [f"{gen}_{y_it}" for y_it in decom_periods if y_it <= y]
+            retired_y1 = [f"{gen}_{y_it}" for y_it in decom_periods if y_it < y]
+
+            has_ret_vars = len(retired_y) > 0
+            
+            decom_status = ">=" if SCENARIO_SETUP["endogenous_coal_decom"] and y>=endogenous_decom_start_year else "=="
+            p_nom_ret_sum = p_nom_ret.loc[retired_y].sum() 
+            p_nom_ret_sum1 = p_nom_ret.loc[retired_y1].sum() 
+
+            if min_phased_decom is not None and has_ret_vars:
+                n.model.add_constraints(
+                    p_nom_ret_sum,
+                    decom_status,
+                    min_phased_decom.loc[y, gen],
+                    name=f"p_nom_ret_min-{gen}-{y}"
+                )
+            
+            # Operational status changes within year based on start_ups allowed, but limit overall status based on retirements
+            op_sign = "<=" if start_limits > 0 else "=="
+            n.model.add_constraints(
+                status.sel({"period": y, "Generator-com": gen})[1:] # allow slack on first and last timesteps to avoid infeasibilities
+                + p_nom_ret_sum,
+                op_sign,
+                1,
+                name=f"status_max-{gen}-{y}",
+            )                 
+            
+            n.model.add_constraints(
+                status.sel({"period": y, "Generator-com": gen})[0:1]
+                + (p_nom_ret_sum+p_nom_ret_sum1)/2,
+                op_sign,
+                1,
+                name=f"status_max_h0-{gen}-{y}",
+            )                      
+        
+            # Contribution to objective 
+            weight = n.investment_period_weightings.loc[y, "objective"]
+            retirement_objective_terms.append(
+                -fom.loc[gen] * weight * p_nom.loc[gen] * p_nom_ret_sum
+            )  
+            retirement_objective_constant += -fom.loc[gen] * weight * p_nom.loc[gen] * -min_phased_decom.loc[y, gen]  # subtract FOM from saving for what would have been partially decommissioned anyway
+
+
+            # Limit number of intra-year starts based on SL_X specification, but adjust to remove decomissioned capacity
+            if start_limits > 0:
+                start_ups = n.model.variables['Generator-start_up'].sel({"Generator-com":gen}).loc[n.snapshots[n.snapshots.get_level_values(0)==y][1:]].sum() # ignore first snapshot of year
+                status_start = n.model.variables['Generator-status'].sel({"Generator-com":gen, "period": y, "timestep": n.snapshots.get_level_values(1)[n.snapshots.get_level_values(0)==y][0]})
+                status_end = n.model.variables['Generator-status'].sel({"Generator-com":gen, "period": y, "timestep":n.snapshots.get_level_values(1)[n.snapshots.get_level_values(0)==y][-1]})
+
+                n.model.add_constraints(
+                    start_ups + start_limits * p_nom_ret_sum <= start_limits + 0.001, # add a small epsilon to avoid numerical issues
+                    name = f'coal_startup_limits-{gen}-{y}',
+                )
+
+                n.model.add_constraints(
+                    status_start <= status_end, # add a small epsilon to avoid numerical issues
+                    name = f'coal_startup_shutdown_balance-{gen}-{y}',
+                )
+
+    n.model.objective += sum(retirement_objective_terms)
+
+    if retirement_objective_constant > 0:
+        object_const = n.model.add_variables(retirement_objective_constant, retirement_objective_constant, name="retirement_objective_constant")
+        n.model.objective += -1 * object_const
+
+    n.retirement_objective_constant = retirement_objective_constant
+    n.objective_constant += retirement_objective_constant
+
+
+def remove_min_up_down_time_constraints(n):
+    """
+    Remove the minimum up and down time constraints for committable generators.
+    """
+
+    logging.warning(f"Removing minimum up and down time constraints for committable generators. Only applicable if two-shifting is not used.")
     
-    param = load_extendable_parameters(n, scenario_setup, snakemake)
-    annual_co2_constraints(n, sns, param, scenario_setup)
-    solver_name = snakemake.config["solving"]["solver"].pop("name")
-    solver_options = snakemake.config["solving"]["solver"].copy()
-    n.optimize.solve_model(solver_name=solver_name, solver_options=solver_options)
+    n.model.remove_constraints(
+        ["Generator-com-up-time", "Generator-com-down-time", "Generator-com-status-min_up_time_must_stay_up"]
+    )
+
+
+def set_operating_reserves(n, sns, SCENARIO_SETUP):
+   
+    reserves = pd.read_excel(
+        os.path.join(SCENARIO_SETUP["sub_path"],"operational_constraints.xlsx"), 
+        sheet_name = "operational_reserves",
+        index_col = [0,1],
+    ).loc[SCENARIO_SETUP["operational_reserves"]].T
+
+    #### Dispatchable generators - coal always on can also add reserves
+    reserve_carriers = snakemake.config["electricity"]["operating_reserve_carriers"]
+    gens_i = n.generators.query("carrier in @reserve_carriers").index    
+    fix_i = n.generators.query("carrier in @reserve_carriers and not p_nom_extendable and not committable").index
+    ext_i = n.generators.query("carrier in @reserve_carriers and p_nom_extendable").index
+    com_i = n.generators.query("carrier in @reserve_carriers and committable").index
+    
+    status = n.model.variables["Generator-status"].rename({"Generator-com":"Generator"})
+
+    active = get_activity_mask(n, "Generator", sns, gens_i)
+    active.index.name="snapshot"
+    
+    p_nom_fix = DataArray(n.generators.loc[fix_i, "p_nom"] * active[fix_i])
+    p_nom_com = status * DataArray(n.generators.loc[com_i, "p_nom"]) * active[com_i]
+        
+    p_nom_ext = n.model.variables["Generator-p_nom"].sel({"Generator-ext":ext_i}).rename({"Generator-ext":"Generator"}) * DataArray(active[ext_i])
+    
+    p_fix = n.model.variables["Generator-p"].sel(Generator=fix_i, snapshot=sns)
+    p_ext = n.model.variables["Generator-p"].sel(Generator=ext_i, snapshot=sns)
+    p_com = n.model.variables["Generator-p"].sel(Generator=com_i, snapshot=sns)
+    p = n.model.variables["Generator-p"].sel(Generator=gens_i, snapshot=sns)
+
+    p_max_pu = DataArray(n.get_switchable_as_dense("Generator", "p_max_pu").loc[sns])
+    n.model.add_variables(lower=0, coords=n.model.variables["Generator-p"].sel(Generator=gens_i, snapshot=sns).coords, name="Generator-op_res", mask=active)  
+        
+    # Add dispatchable generator total reserves
+    op_res_lhs = n.model.variables["Generator-op_res"].sel(Generator=fix_i,snapshot=sns) + p_fix
+    op_res_rhs = p_max_pu.sel(Generator=fix_i, snapshot=sns)  * p_nom_fix
+    n.model.add_constraints(op_res_lhs <= op_res_rhs, name="Generator-fix-op_res", mask=active[fix_i])
+
+    op_res_lhs = n.model.variables["Generator-op_res"].sel(Generator=ext_i,snapshot=sns) + p_ext - p_max_pu.sel(Generator=ext_i, snapshot=sns)  * p_nom_ext 
+    n.model.add_constraints(op_res_lhs <= 0, name="Generator-ext-op_res", mask=active[ext_i])
+    op_res_rhs = p_max_pu.sel(Generator=fix_i, snapshot=sns)  * p_nom_fix
+
+    op_res_lhs = n.model.variables["Generator-op_res"].sel(Generator=com_i,snapshot=sns) + p_com - p_max_pu.sel(Generator=com_i, snapshot=sns)  * p_nom_com 
+    n.model.add_constraints(op_res_lhs <= 0, name="Generator-com-op_res", mask=active[com_i])
+
+    #### Energy storage
+    fix_i = n.storage_units.query("p_nom_extendable == False").index
+    ext_i = n.storage_units.query("p_nom_extendable == True").index
+    st_i = n.storage_units.index
+    active = get_activity_mask(n, "StorageUnit", sns, st_i)
+    active.index.name="snapshot"
+
+    p_nom_st_fix = DataArray(n.storage_units.loc[fix_i, "p_nom"]) * DataArray(active[fix_i])
+    p_nom_st_ext = n.model.variables["StorageUnit-p_nom"].sel({"StorageUnit-ext":ext_i}).rename({"StorageUnit-ext":"StorageUnit"}) * DataArray(active[ext_i])
+
+    st_p_max_pu = n.get_switchable_as_dense("StorageUnit", "p_max_pu")
+
+    n.model.add_variables(lower=0, coords=n.model.variables["StorageUnit-p_store"].sel(snapshot=sns).coords, name="StorageUnit-op_res", mask = active)
+    p_store = n.model.variables["StorageUnit-p_store"].sel(snapshot=sns)
+    p_dispatch = n.model.variables["StorageUnit-p_dispatch"].sel(snapshot=sns)
+
+    st_res_lhs1 = n.model.variables["StorageUnit-op_res"].sel(StorageUnit = fix_i, snapshot=sns) + p_dispatch.sel(StorageUnit = fix_i, snapshot=sns)  - p_store.sel(StorageUnit = fix_i, snapshot=sns) #- st_p_max_pu_ext * p_nom_st_ext
+    st_res_rhs1 = DataArray(st_p_max_pu[fix_i]) * p_nom_st_fix
+    n.model.add_constraints(st_res_lhs1 <= st_res_rhs1, name="StorageUnit-fix-res1", mask=active[fix_i])
+
+    st_res_lhs2 = n.model.variables["StorageUnit-op_res"].sel(StorageUnit=fix_i, snapshot=sns)
+    st_res_rhs2 = n.model.variables["StorageUnit-state_of_charge"].sel(StorageUnit=fix_i, snapshot=sns) + p_store.sel(StorageUnit = fix_i, snapshot=sns) 
+    n.model.add_constraints(st_res_lhs2 <= st_res_rhs2, name="StorageUnit-fix-res2", mask =active[fix_i])
+
+    st_res_lhs1 = n.model.variables["StorageUnit-op_res"].sel(StorageUnit=ext_i, snapshot=sns) + p_dispatch.sel(StorageUnit = ext_i, snapshot=sns) - p_store.sel(StorageUnit = ext_i, snapshot=sns) - st_p_max_pu[ext_i] * p_nom_st_ext
+    n.model.add_constraints(st_res_lhs1 <= 0, name="StorageUnit-ext-res1")
+
+    st_res_lhs2 = n.model.variables["StorageUnit-op_res"].sel(StorageUnit=ext_i,snapshot=sns)
+    st_res_rhs2 = n.model.variables["StorageUnit-state_of_charge"].sel(StorageUnit=ext_i,snapshot=sns) + p_store.sel(StorageUnit = ext_i, snapshot=sns)
+    n.model.add_constraints(st_res_lhs2 <= st_res_rhs2, name="StorageUnit-ext-res2", mask= active[ext_i])
+
+    #### Total reserves
+
+    tot_res = (
+        n.model.variables["Generator-op_res"].sum("Generator") 
+        + n.model.variables["StorageUnit-op_res"].sum("StorageUnit")
+    )
+
+    reserve_requirements = pd.DataFrame(index=sns, columns= ["total"])
+    for y in sns.get_level_values(0).unique():
+        reserve_requirements.loc[y, "total"] = reserves.loc[y, "total"]
+    reserve_requirements.columns.name = "_type"
+    reserve_requirements = DataArray(reserve_requirements)
+
+    n.model.add_constraints(tot_res >= reserve_requirements.sel(_type="total"), name="Operating_reserves")
+
+    return
+
+def solve_network(n, sns, full_outages_pu_max):
+
+    n.optimize.create_model(snapshots = sns, multi_investment_periods = n.multi_invest, linearized_unit_commitment = True)    
+
+    set_operational_limits(n, sns, SCENARIO_SETUP, snakemake)
+    ccgt_steam_constraints(n, sns, SCENARIO_SETUP, snakemake)
+    #set_operating_reserves(n, sns, SCENARIO_SETUP)
+        
+    if SCENARIO_SETUP["unit_committment"]:
+        start_limits = float(SCENARIO_SETUP["dispatch_coal_flex"].split("_")[1])
+        add_coal_decom(n, start_limits, full_outages_pu_max)
+        param = load_extendable_parameters(n, SCENARIO_SETUP, snakemake)
+        if SCENARIO_SETUP["carbon_constraints"] not in ["None", "none", "", "-"]:
+            gen_emissions = pd.read_csv(snakemake.input["generator_emissioans"],index_col=[0])
+            add_annual_co2_constraints(n, sns, param, SCENARIO_SETUP, gen_emissions)
+
+
+    reserve_margin_constraints(n, sns, SCENARIO_SETUP, snakemake)
+
+    if SCENARIO_SETUP["unit_committment"]:
+        remove_min_up_down_time_constraints(n)
+    n.optimize.solve_model(solver_name=SOLVER_NAME, solver_options=SOLVER_OPTIONS)
+
+
+def scale_costs(n, scaling_factor):
+
+    for c in ["Generator", "StorageUnit", "Link"]:
+
+        static_cost_param = [col for col in n.df(c).columns if "cost" in col]
+        for p in static_cost_param:
+            n.df(c)[p] = n.df(c)[p] / scaling_factor
+
+        dynamic_cost_param = [col for col in n.pnl(c).keys() if "cost" in col]
+        for p in dynamic_cost_param:
+            n.pnl(c)[p] = n.pnl(c)[p] / scaling_factor
+
+def add_noisy_costs(n, config):
+    for c in ["Generator", "StorageUnit", "Link"]:
+        mc = n.pnl(c)["marginal_cost"] 
+        random_adj = 2e-3*(np.random.random(len(mc.columns)) - 0.5) * 10
+        for col in range(len(mc.columns)):
+            n.pnl(c)["marginal_cost"].iloc[:,col] += random_adj[col] 
+
+
 
 if __name__ == "__main__":
     if 'snakemake' not in globals():
@@ -382,32 +495,32 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             'prepare_and_solve_network', 
             **{
-                'scenario':'IRP_REF_CI',
+                'scenario':"S1",
             }
         )
-    logging.info("Preparing costs")
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(levelname)s: %(asctime)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+    logging.info("Loading network")
+
+    # Set fixed seed for random to ensure reproducibility
+    RANDOM_SEED = snakemake.config["random_seed"]
+    np.random.seed(RANDOM_SEED)
 
     n = pypsa.Network(snakemake.input[0])
-    scenario_setup = load_scenario_definition(snakemake)
-    
-    opts = scenario_setup["options"].split("-")
-    for o in opts:
-        m = re.match(r"^\d+h$", o, re.IGNORECASE)
-        if m is not None:
-            n = average_every_nhours(n, m[0])
-            break
 
-    for o in opts:
-        m = re.match(r"^\d+SEG$", o, re.IGNORECASE)
-        if m is not None:
-            try:
-                import tsam.timeseriesaggregation as tsam
-            except:
-                raise ModuleNotFoundError(
-                    "Optional dependency 'tsam' not found." "Install via 'pip install tsam'"
-                )
-            n = apply_time_segmentation(n, m[0][:-3], snakemake.config["tsam_clustering"])
-            break
+    n.generators.ramp_limit_start_up = 0.65
+
+    n.generators.ramp_limit_shut_down = 0.65   
+
+    SCENARIO_SETUP = load_scenario_definition(snakemake.wildcards.scenario, snakemake.config)
+
+    SOLVER_NAME = snakemake.config["solver"][SCENARIO_SETUP["solver"]].pop("name")
+    SOLVER_OPTIONS = snakemake.config["solver"][SCENARIO_SETUP["solver"]].copy()
+
 
     logging.info("Setting global and regional build limits")
     if len(n.buses) != 1: #covered under single bus limits
@@ -415,10 +528,26 @@ if __name__ == "__main__":
     set_extendable_limits_per_bus(n)
 
     logging.info("Solving network")
-    solve_network(n, n.snapshots)
-    
+
+    full_outages_pu_max = pd.DataFrame()
+
+    n = check_pu_profiles(n, snakemake.config["electricity"]["clean_pu_profiles"])
+
+    if snakemake.config["costs"]["noisy_costs"]:
+        add_noisy_costs(n, snakemake.config)
+
+    scale_costs(n, 1e3)
+    solve_network(n, n.snapshots, full_outages_pu_max)
+
     n.export_to_netcdf(snakemake.output[0])
     n.statistics().to_csv(snakemake.output[1])
-    calc_emissions(n, scenario_setup).to_csv(snakemake.output[2])
-    #calc_cumulative_new_capacity(n).to_csv(snakemake.output[3])
-
+    n.generators.to_csv(snakemake.output[2])
+    n.storage_units.to_csv(snakemake.output[3])
+    get_capacity_value(n).to_csv(snakemake.output[4])
+    
+    try:
+        n.model.solution["Generator-p_nom_ret"].to_dataframe().to_csv(snakemake.output[5])
+    except:
+        # create empty dataframe if no retirement variables are present to avoid breaking snakemake workflow
+        pd.DataFrame().to_csv(snakemake.output[5])
+    full_outages_pu_max.to_csv(snakemake.output[6])

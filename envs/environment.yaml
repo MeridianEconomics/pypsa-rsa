@@ -15,20 +15,21 @@ dependencies:
   - glpk
   - graphviz
   - ipython
+  - linopy
   - lxml
   - matplotlib
   - memory_profiler
   - netcdf4
   - networkx
-  - numpy
+  - numpy=1.26.*
   - openpyxl!=3.1.1
-  - pandas[version='>=2.1']
+  - pandas=2.2.*
   - pip
   - powerplantmatching[version='>=0.5.15']
   - pre-commit
   - proj
   - pycountry
-  - pypsa=0.30.0
+  - pypsa=0.35.2
   - pyscipopt
   - pytables
   - python[version='>=3.8']
@@ -39,10 +40,10 @@ dependencies:
   - scipy
   - seaborn
   - shapely[version='>=2.0']
-  - snakemake-minimal[version='>=8.14']
+  - snakemake-minimal=8.30.0
   - tabula-py
   - tqdm
-  - xarray[version='>=2023.11.0']
+  - xarray=2025.*
   - xlrd
   - yaml
   - ipykernel

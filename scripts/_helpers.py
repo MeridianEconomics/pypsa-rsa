@@ -13,6 +13,9 @@ from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 from pypsa.descriptors import get_activity_mask, get_active_assets
 from pypsa.io import import_components_from_dataframe
 
+import socket
+
+import xarray as xr
 """
 List of general helper functions
 - configure_logging ->
@@ -128,7 +131,7 @@ def read_and_filter_generators(file, sheet, index, filter_carriers):
         na_values=["-"],
         index_col=[0,1]
     ).loc[index]
-    return df[df["Carrier"].isin(filter_carriers)]
+    return df[df["carrier"].isin(filter_carriers)]
 
 
 def read_csv_nafix(file, **kwargs):
@@ -213,25 +216,19 @@ def load_disaggregate(v, h):
         v.values.reshape((-1, 1)) * h.values, index=v.index, columns=h.index
     )
 
-def load_scenario_definition(snakemake):
-
-    script_dir = Path(__file__).parent.resolve()
-    prefix = ".." if Path.cwd().resolve() == script_dir else ""
-
-    scenario_folder =  os.path.join(
-            prefix,
-            "scenarios",
-            snakemake.config["scenarios"]["folder"]
-    )
+def load_scenario_definition(scenario, config, include_run_only = True):
+    
+    scenario_folder = config["scenarios"]["input_folder"]
 
     scenario_setup = load_scenario_setup(
-        os.path.join(scenario_folder, snakemake.config["scenarios"]["setup"]), 
-        snakemake.wildcards.scenario
+        os.path.join(scenario_folder,config["scenarios"]["working_folder"], config["scenarios"]["setup"]), 
+        scenario,
+        include_run_only = include_run_only,
     )
     scenario_setup["path"] = scenario_folder
-    scenario_setup["sub_path"] = scenario_folder + "/sub_scenarios"
+    scenario_setup["sub_path"] = scenario_setup["path"] + "/" + config["scenarios"]["working_folder"] + "/sub_scenarios"
 
-    return scenario_setup
+    return scenario_setup.fillna("none")
 
 def load_network_for_plots(fn, model_file, config, model_setup_costs, combine_hydro_ps=True, ):
     import pypsa
@@ -439,48 +436,6 @@ def aggregate_costs(n):
         
     return fixed_cost, variable_cost
 
-# def aggregate_costs(n, flatten=False, opts=None, existing_only=False):
-
-#     components = dict(
-#         Link=("p_nom", "p0"),
-#         Generator=("p_nom", "p"),
-#         StorageUnit=("p_nom", "p"),
-#         Store=("e_nom", "p"),
-#         Line=("s_nom", None),
-#         Transformer=("s_nom", None),
-#     )
-
-#     costs = {}
-#     for c, (p_nom, p_attr) in zip(
-#         n.iterate_components(components.keys(), skip_empty=False), components.values()
-#     ):
-#         if c.df.empty:
-#             continue
-#         if not existing_only:
-#             p_nom += "_opt"
-#         costs[(c.list_name, "capital")] = (
-#             (c.df[p_nom] * c.df.capital_cost).groupby(c.df.carrier).sum()
-#         )
-#         if p_attr is not None:
-#             p = c.pnl[p_attr].sum()
-#             if c.name == "StorageUnit":
-#                 p = p.loc[p > 0]
-#             costs[(c.list_name, "marginal")] = (
-#                 (p * c.df.marginal_cost).groupby(c.df.carrier).sum()
-#             )
-#     costs = pd.concat(costs)
-
-#     if flatten:
-#         assert opts is not None
-#         conv_techs = opts["conv_techs"]
-
-#         costs = costs.reset_index(level=0, drop=True)
-#         costs = costs["capital"].add(
-#             costs["marginal"].rename({t: t + " marginal" for t in conv_techs}),
-#             fill_value=0.0,
-#         )
-
-#     return costs
 
 
 def progress_retrieve(url, file, data=None, disable_progress=False, roundto=1.0):
@@ -534,7 +489,6 @@ def get_aggregation_strategies(aggregation_strategies):
 
     return bus_strategies, generator_strategies
 
-
 def mock_snakemake(rulename, **wildcards):
     """
     This function is expected to be executed from the "scripts"-directory of "
@@ -554,11 +508,10 @@ def mock_snakemake(rulename, **wildcards):
     import os
 
     import snakemake as sm
-    try:
-        from pypsa.descriptors import Dict
-    except:
-        from pypsa.definitions.structures import Dict
-    from snakemake.script import Snakemake
+    #try:
+    #    from pypsa.descriptors import Dict
+    #except:
+    from pypsa.definitions.structures import Dict
     from snakemake.script import Snakemake
     from snakemake.common import SNAKEFILE_CHOICES
     from snakemake.api import Workflow
@@ -579,7 +532,7 @@ def mock_snakemake(rulename, **wildcards):
         if os.path.exists(p):
             snakefile = p
             break
-    workflow = Workflow(ConfigSettings(configfiles=[]), ResourceSettings(), WorkflowSettings(), StorageSettings(), DAGSettings(rerun_triggers=[]), storage_provider_settings=dict())   
+    workflow = Workflow(ConfigSettings(configfiles=[]), ResourceSettings(), WorkflowSettings(), StorageSettings(), DAGSettings(rerun_triggers=[]), storage_provider_settings=dict())
     workflow.include(snakefile)
     workflow.global_resources = {}
     try:
@@ -621,6 +574,45 @@ def mock_snakemake(rulename, **wildcards):
     return snakemake
 
 
+def n_meta_convert_df_to_dict(obj):
+    # Base case: if obj is not a dict, series, or dataframe, return it as it is
+    if not isinstance(obj, (dict, pd.Series, pd.DataFrame, xr.DataArray)):
+        return obj
+    # Recursive case: if obj is a dict, series, or dataframe, create a new dict and apply the function to its values
+    else:
+        # Create a new dict
+        new_dict = {}
+
+        # Convert obj to a dict
+        if isinstance(obj, pd.Series):
+            obj = obj.to_dict()
+            obj = {str(k): v for k, v in obj.items()}
+
+        elif isinstance(obj, pd.DataFrame):
+            # If DataFrame has multi-index, combine indices into a single string-based index
+            if isinstance(obj.index, pd.MultiIndex):
+                df_reset = obj.reset_index()
+                combined_index = ['_'.join(map(str, row)) for row in df_reset.values[:, :obj.index.nlevels]]
+                df_reset['combined_index'] = combined_index
+                # We leave the columns in to make it easier to reconsitute the DataFrame later
+                #obj = df_reset.set_index('combined_index').drop(columns=obj.index.names).to_dict(orient="index")
+                obj = df_reset.set_index('combined_index').to_dict(orient="index")
+            else:
+                obj = obj.to_dict(orient="index")
+        elif isinstance(obj, xr.DataArray):
+            # Convert DataArray to a dictionary
+            obj = obj.to_dict()    
+
+        # Convert any timestamp index to a float and add to the new dict
+        for key in obj:
+            if isinstance(key, pd.Timestamp):
+                new_key = key.timestamp()
+            else:
+                new_key = key
+            new_dict[new_key] = n_meta_convert_df_to_dict(obj[key])
+            
+        return new_dict
+
 
 def save_to_geojson(df, fn, crs = 'EPSG:4326'):
     if os.path.exists(fn):
@@ -646,77 +638,102 @@ def read_geojson(fn):
 
 
 def convert_cost_units(costs, USD_ZAR, EUR_ZAR):
-    costs_yr = costs.columns.drop('unit')
-    costs.loc[costs.unit.str.contains("/kW")==True, costs_yr ] *= 1e3
-    costs.loc[costs.unit.str.contains("USD")==True, costs_yr ] *= USD_ZAR
-    costs.loc[costs.unit.str.contains("EUR")==True, costs_yr ] *= EUR_ZAR
+    costs_yr = costs.columns.drop('units')
+    costs.loc[costs.units.str.contains("/kW")==True, costs_yr ] *= 1e3
+    costs.loc[costs.units.str.contains("USD")==True, costs_yr ] *= USD_ZAR
+    costs.loc[costs.units.str.contains("EUR")==True, costs_yr ] *= EUR_ZAR
 
-    costs.loc[costs.unit.str.contains('/kW')==True, 'unit'] = costs.loc[costs.unit.str.contains('/kW')==True, 'unit'].str.replace('/kW', '/MW')
-    costs.loc[costs.unit.str.contains('USD')==True, 'unit'] = costs.loc[costs.unit.str.contains('USD')==True, 'unit'].str.replace('USD', 'ZAR')
-    costs.loc[costs.unit.str.contains('EUR')==True, 'unit'] = costs.loc[costs.unit.str.contains('EUR')==True, 'unit'].str.replace('EUR', 'ZAR')
+    costs.loc[costs.units.str.contains('/kW')==True, 'units'] = costs.loc[costs.units.str.contains('/kW')==True, 'units'].str.replace('/kW', '/MW')
+    costs.loc[costs.units.str.contains('USD')==True, 'units'] = costs.loc[costs.units.str.contains('USD')==True, 'units'].str.replace('USD', 'ZAR')
+    costs.loc[costs.units.str.contains('EUR')==True, 'units'] = costs.loc[costs.units.str.contains('EUR')==True, 'units'].str.replace('EUR', 'ZAR')
+
+    costs.loc[costs.units.str.contains("tCO2")==True, costs_yr ] *= 1e3
+    costs.loc[costs.units.str.contains("tCO2")==True, 'units'] = costs.loc[costs.units.str.contains('tCO2')==True, 'units'].str.replace('tCO2', 'kgCO2')
 
     # Convert fuel cost from R/GJ to R/MWh
-    costs.loc[costs.unit.str.contains("R/GJ")==True, costs_yr ] *= 3.6 
-    costs.loc[costs.unit.str.contains("R/GJ")==True, 'unit'] = 'R/MWhe' 
+    costs.loc[costs.units.str.contains("R/GJ")==True, costs_yr ] *= 3.6 
+    costs.loc[costs.units.str.contains("R/GJ")==True, 'units'] = 'R/MWht' 
     return costs
 
-def map_component_parameters(tech, first_year, tech_flag):
+def map_component_parameters(tech, first_year, last_year, tech_flag):
 
     rename_dict = dict(
-        fom = "Fixed O&M Cost (R/kW/yr)",
-        p_nom = 'Capacity (MW)',
-        name ='Power Station Name',
-        carrier = 'Carrier',
-        build_year = 'Commissioning Date',
-        decom_date = 'Decommissioning Date',
-        x = 'GPS Longitude',
-        y = 'GPS Latitude',
-        status = 'Status',
-        heat_rate = 'Heat Rate (GJ/MWh)',
-        fuel_price = 'Fuel Price (R/GJ)',
-        vom = 'Variable O&M Cost (R/MWh)',
-        max_ramp_up = 'Max Ramp Up (%/h)',
-        max_ramp_down = 'Max Ramp Down (%/h)',
-        max_ramp_start_up = 'Max Ramp Start Up (%/h)',
-        max_ramp_shut_down = 'Max Ramp Shut Down (%/h)',
-        start_up_cost = 'Start Up Cost (R)',
-        shut_down_cost = 'Shut Down Cost (R)',
-        p_min_pu = 'Min Stable Level (%)',
-        min_up_time = 'Min Up Time (h)',
-        min_down_time = 'Min Down Time (h)',
-        unit_size = 'Unit size (MW)',
-        units = 'Number units',
-        maint_rate = 'Typical annual maintenance rate (%)',
-        out_rate = 'Typical annual forced outage rate (%)',
-        st_efficiency="Round Trip Efficiency (%)",
-        max_hours="Max Storage (hours)",
-        CSP_max_hours='CSP Storage (hours)'
+        fom = "fixed_om_cost (R/kW/yr)",
+        p_nom = 'capacity (MW)',
+        name ='station_name',
+        carrier = 'carrier',
+        build_year = 'commissioning_date',
+        decom_date = 'decommissioning_date',
+        x = 'gps_lon',
+        y = 'gps_lat',
+        status = 'status',
+        heat_rate = 'marginal_heat_rate (GJ/MWh)',
+        no_load_heat_rate = 'no_load_heat_rate (GJ/h)',
+        fuel_price = 'fuel_price (R/GJ)',
+        vom = 'variable_om_cost (R/MWh)',
+        max_ramp_up = 'max_ramp_up (%/h)',
+        max_ramp_down = 'max_ramp_down (%/h)',
+        max_ramp_start_up = 'max_ramp_start_up (%/h)',
+        max_ramp_shut_down = 'max_ramp_shut_down (%/h)',
+        start_up_cost = 'start_up_cost (R)',
+        shut_down_cost = 'shut_down_cost (R)',
+        min_stable_level = 'min_stable_level (%)',
+        min_up_time = 'min_up_time (h)',
+        min_down_time = 'min_down_time (h)',
+        unit_size = 'unit_size (MW)',
+        units = 'number_units',
+        st_efficiency="round_trip_efficiency (%)",
+        max_hours="storage_hours",
+        CSP_max_hours='csp_storage_hours',
+        committable = "dispatch_committable",
+        #emissions = "co2_emissions_output (kgCO2/MWh)",
+        input_emissions = "co2_emissions_input (kgCO2/GJ)",
     )
 
     if tech_flag == 'Generator':
-        tech['efficiency'] = (3.6/tech.pop(rename_dict['heat_rate'])).fillna(1)
+        tech['efficiency'] = (3.6/tech.pop(rename_dict['heat_rate'])).fillna(1) # convert GJ/MWh to %
+        tech["stand_by_energy"] = tech.pop(rename_dict['no_load_heat_rate']).fillna(0) # GJ/h
         tech['ramp_limit_up'] = tech.pop(rename_dict['max_ramp_up'])
         tech['ramp_limit_down'] = tech.pop(rename_dict['max_ramp_down'])     
+        tech['p_min_pu'] = tech.pop(rename_dict['min_stable_level']).fillna(0)
         tech['ramp_limit_start_up'] = tech.pop(rename_dict['max_ramp_start_up'])
         tech['ramp_limit_shut_down'] = tech.pop(rename_dict['max_ramp_shut_down'])    
         tech['start_up_cost'] = tech.pop(rename_dict['start_up_cost']).fillna(0)
         tech['shut_down_cost'] = tech.pop(rename_dict['shut_down_cost']).fillna(0)
         tech['min_up_time'] = tech.pop(rename_dict['min_up_time']).fillna(0)
         tech['min_down_time'] = tech.pop(rename_dict['min_down_time']).fillna(0)
-        tech['marginal_cost'] = (3.6*tech.pop(rename_dict['fuel_price'])/tech['efficiency']).fillna(0) + tech.pop(rename_dict['vom'])
+        tech["fuel_price"] = tech.pop(rename_dict['fuel_price']).fillna(0)
+        tech["vom"] = tech.pop(rename_dict['vom']).fillna(0)
+
+        #tech['marginal_cost'] = (3.6*tech.pop(rename_dict['fuel_price'])/tech['efficiency']).fillna(0) + tech.pop(rename_dict['vom'])
+        tech["committable"] = tech.pop(rename_dict["committable"]).fillna(0)
+        tech["input_emissions"] = tech.pop(rename_dict["input_emissions"]).fillna(0)
+        #tech["output_emissions"] = tech.pop(rename_dict["emissions"]).fillna(0) #moved from Excel input to calculated here.
+            
+        # Calculate marginal cost if static fuel costs are specified
+        static_fuel = find_non_string_entries(tech["fuel_price"]) # fuel prices can vary over time as well, so we only consider static input prices here
+        tech[["marginal_cost","stand_by_cost","stand_by_emissions"]] = 0
+        tech.loc[static_fuel, 'marginal_cost'] = 3.6 * (tech.loc[static_fuel, 'fuel_price'] / tech.loc[static_fuel, 'efficiency']).fillna(0) + tech.loc[static_fuel, 'vom'] # Fuel cost R/GJ conversion to R/MWh hence *3.6 factor
+        tech.loc[static_fuel, 'stand_by_cost'] = tech.loc[static_fuel, 'fuel_price'] * tech.loc[static_fuel, 'stand_by_energy'].fillna(0) #R/GJ * GJ/h -> R/h 
+        
+        # Calculate emissions based on input emissions        
+        static_input_emissions = find_non_string_entries(tech["input_emissions"]) # fuel emissions can vary over time as well, so we only consider static input emissions here
+        tech.loc[static_input_emissions, "output_emissions"] = 3.6 / tech.loc[static_input_emissions, "efficiency"] * tech.loc[static_input_emissions, "input_emissions"].astype(float) #GJ/MWh * kgCO2/GJ -> kgCO2/MWh
+        tech.loc[static_input_emissions, "stand_by_emissions"] = tech.loc[static_input_emissions, "stand_by_energy"] * tech.loc[static_input_emissions, "input_emissions"].astype(float) # GJ/h * kgCO2/GJ -> kgCO2/h
+
     else:
         tech["efficiency"] = tech.pop(rename_dict["st_efficiency"])
         tech["max_hours"] = tech.pop(rename_dict["max_hours"])
         tech['marginal_cost'] = tech.pop(rename_dict['vom'])
 
-    
     tech['capital_cost'] = 1e3*tech.pop(rename_dict['fom'])
     tech = tech.rename(
-        columns={rename_dict[f]: f for f in {'p_nom', 'name', 'carrier', 'x', 'y','build_year','decom_date','p_min_pu'}}
+        columns={rename_dict[f]: f for f in {'p_nom', 'name', 'carrier', 'x', 'y','build_year','decom_date'}}
     )
 
+    tech['build_year'] = tech['build_year'].replace({'pre': first_year-1}).values
     tech['build_year'] = tech['build_year'].fillna(first_year-1).values
-    tech['decom_date'] = tech['decom_date'].replace({'beyond 2050': 2051}).values
+    tech['decom_date'] = tech['decom_date'].replace({'post': last_year+1}).values
     tech['lifetime'] = tech['decom_date'] - tech['build_year']
 
     return tech
@@ -733,8 +750,8 @@ def save_to_geojson(df, fn):
     # save file if the GeoDataFrame is non-empty
     if df.shape[0] > 0:
         df = df.reset_index()
-        # schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
-        df.to_file(fn, driver="GeoJSON") # schema=schema)
+        #schema = {**gpd.io.file.infer_schema(df), "geometry": "Unknown"}
+        df.to_file(fn, driver="GeoJSON")#, schema=schema)
     else:
         # create empty file to avoid issues with snakemake
         with open(fn, "w") as fp:
@@ -751,12 +768,11 @@ def normalize_and_rename_df(df, snapshots, fillna, suffix=None):
         df.columns += f'_{suffix}'
     return df, df.max()
 
-def normalize_and_rename_df(df, snapshots, fillna, suffix=None):
-    df = df.loc[snapshots]
-    df = (df / df.max()).fillna(fillna)
-    if suffix:
-        df.columns += f'_{suffix}'
-    return df, df.max()
+def find_string_entries(series):
+    return series[series.apply(lambda x: isinstance(x, str))]#.index
+
+def find_non_string_entries(series):
+    return series[~series.apply(lambda x: isinstance(x, str))].index
 
 def assign_segmented_df_to_network(df, search_str, replace_str, target):
     cols = df.columns[df.columns.str.contains(search_str)]
@@ -768,6 +784,9 @@ def assign_segmented_df_to_network(df, search_str, replace_str, target):
 def get_start_year(sns, multi_invest):
     return sns.get_level_values(0)[0] if multi_invest else sns[0].year
 
+def get_end_year(sns, multi_invest):
+    return sns.get_level_values(0)[-1] if multi_invest else sns[0].year
+
 def get_snapshots(sns, multi_invest):
     return sns.get_level_values(1) if multi_invest else sns
 
@@ -775,37 +794,55 @@ def get_investment_periods(sns, multi_invest):
     return sns.get_level_values(0).unique().to_list() if multi_invest else [sns[0].year]
 
 def adjust_by_p_max_pu(n, config):
-    p_max = get_as_dense(n, "Generator", "p_max_pu")
-
     for carrier in config.keys():
-        gen_list = n.generators[n.generators.carrier == carrier].index
-        for p in config[carrier]:#["p_min_pu", "ramp_limit_up", "ramp_limit_down"]:
-            n.generators_t[p][gen_list] = (
-                get_as_dense(n, "Generator", p)[gen_list] * get_as_dense(n, "Generator", "p_max_pu")[gen_list]
+        com_i = n.generators.query("carrier == @carrier & committable").index
+        non_com_i = n.generators.query("carrier == @carrier & committable == False").index
+        for p in config[carrier]:
+            n.generators.loc[com_i, p] = (
+                n.generators.loc[com_i, p] * get_as_dense(n, "Generator", "p_max_pu")[com_i].mean()
             )
 
+            n.generators_t[p][non_com_i] = (
+                get_as_dense(n, "Generator", p)[non_com_i] * get_as_dense(n, "Generator", "p_max_pu")[non_com_i]
+            )
+     
+
 def initial_ramp_rate_fix(n):
+    """
+    Under certain conditions the ramp rates of the generators between periods can lead to infeasibilities. 
+    This function sets the ramp rates of the first snapshot in each period to 1 to avoid this scenario.
+    """
     ramp_up_dense = get_as_dense(n, "Generator", "ramp_limit_up")
     ramp_down_dense = get_as_dense(n, "Generator", "ramp_limit_down")
-    p_min_pu_dense = get_as_dense(n, "Generator", "p_min_pu")
-
-    limit_up = ~ramp_up_dense.isnull().all()
-    limit_down = ~ramp_down_dense.isnull().all()
     
-    for y, y_prev in zip(n.investment_periods[1:], n.investment_periods[:-1]):
+    for y in n.investment_periods:
         first_sns = (y, f"{y}-01-01 00:00:00")
-        new_build = n.generators.query("build_year <= @y & build_year > @y_prev").index
+        ramp_up_dense.loc[first_sns] = 1
+        ramp_down_dense.loc[first_sns] = 1
+    
+    n.generators_t.ramp_limit_up = ramp_up_dense
+    n.generators_t.ramp_limit_down = ramp_down_dense
 
-        gens_up = new_build[limit_up[new_build]]
-        n.generators_t.ramp_limit_up.loc[:, gens_up] = ramp_up_dense.loc[:, gens_up]
-        n.generators_t.ramp_limit_up.loc[first_sns, gens_up] = np.maximum(p_min_pu_dense.loc[first_sns, gens_up], ramp_up_dense.loc[first_sns, gens_up])
+    #p_min_pu_dense = get_as_dense(n, "Generator", "p_min_pu")
+
+    # limit_up = ~ramp_up_dense.isnull().all()
+    # limit_down = ~ramp_down_dense.isnull().all()
+    
+    # for y, y_prev in zip(n.investment_periods[1:], n.investment_periods[:-1]):
+    #     first_sns = (y, f"{y}-01-01 00:00:00")
+    #     gen_list = np.unique(list(n.generators.query("build_year <= @y & build_year > @y_prev").index) + list(n.generators.query("carrier == 'coal'").index))
+
+    #     gens_up = gen_list[limit_up[gen_list]]
+
+    #     n.generators_t.ramp_limit_up.loc[y, gens_up] = ramp_up_dense.loc[y, gens_up]
+    #     n.generators_t.ramp_limit_up.loc[(y,first_sns), gens_up] = np.maximum(p_min_pu_dense.loc[first_sns, gens_up], ramp_up_dense.loc[first_sns, gens_up])
         
-        gens_down = new_build[limit_down[new_build]]
-        n.generators_t.ramp_limit_down.loc[:,gens_down] = ramp_down_dense.loc[:, gens_down]
-        n.generators_t.ramp_limit_down.loc[first_sns, gens_down] = np.maximum(p_min_pu_dense.loc[first_sns, gens_up], ramp_up_dense.loc[first_sns, gens_up])
+    #     gens_down = gen_list[limit_down[gen_list]]
+    #     n.generators_t.ramp_limit_down.loc[y,gens_down] = ramp_down_dense.loc[y, gens_down]
+    #     n.generators_t.ramp_limit_down.loc[(y, first_sns), gens_down] = np.maximum(p_min_pu_dense.loc[first_sns, gens_up], ramp_up_dense.loc[first_sns, gens_up])
 
 
-def apply_default_attr(df, attrs):
+def apply_default_attr(df, attrs, snakemake):
     params = [
         "bus", 
         "carrier", 
@@ -824,12 +861,15 @@ def apply_default_attr(df, attrs):
         "shut_down_cost", 
         "min_up_time", 
         "min_down_time",
-        #"p_min_pu",
+        "p_min_pu",
+        "committable",
     ]
+
     params += uc_params
-    
     default_attrs = attrs[["default","type"]]
     default_list = default_attrs.loc[default_attrs.index.isin(params), "default"].dropna().index
+
+    default_list = default_list[default_list.isin(df.columns)]
 
     conv_type = {'int': int, 'float': float, "static or series": float, "series": float, 'boolean': bool, 'string': str}
     for attr in default_list:
@@ -865,22 +905,22 @@ def get_carriers_from_model_file(scenario_setup):
             sheet_name=f"{tech}",
             na_values=["-"],
             index_col=[0,1]
-        ).loc[scenario_setup[f"fixed_{tech}"]]["Carrier"].unique())
+        ).loc[scenario_setup[f"fixed_{tech}"]]["carrier"].unique())
 
     ext_carriers = (
         pd.read_excel(
             os.path.join(scenario_setup["sub_path"],"extendable_technologies.xlsx"), 
             sheet_name='active',
             index_col=[0,1,2],
-    ))[scenario_setup["extendable_techs"]]
+    ))[scenario_setup["extendable_active"]]
 
     ext_carriers = ext_carriers[ext_carriers==True].reset_index()
-    ext_carriers= ext_carriers.drop_duplicates(subset='Carrier', keep='first').reset_index()[["Carrier", "Category"]]
+    ext_carriers= ext_carriers.drop_duplicates(subset='carrier', keep='first').reset_index()[["carrier", "category"]]
 
 
-    ext_carriers.set_index("Category", inplace=True)
+    ext_carriers.set_index("category", inplace=True)
     for tech in ["conventional", "renewables", "storage"]:
-        carriers["extendable"][tech] = list(ext_carriers.loc[tech].Carrier.unique()) if len(ext_carriers.loc[tech])>1 else ext_carriers.loc[tech].Carrier
+        carriers["extendable"][tech] = list(ext_carriers.loc[tech].carrier.unique()) if len(ext_carriers.loc[tech])>1 else ext_carriers.loc[tech].carrier
 
     return carriers
 
@@ -892,16 +932,18 @@ def check_folder(path):
         print(f"Folder '{path}' created.")
 
 
-def load_scenario_setup(scenarios_file, scenario):
+def load_scenario_setup(scenarios_file, scenario, include_run_only=True):
     scenario_setup = (
         pd.read_excel(
             scenarios_file, 
             sheet_name="scenario_definition",
-            index_col=[0])
-            .loc[scenario]
+            index_col=[1])
     )
-    return scenario_setup
 
+    if include_run_only:
+        return (scenario_setup[scenario_setup.run_scenario.astype(bool)]).loc[scenario]
+    else:
+        return scenario_setup.loc[scenario]
 
 # Temp PyPSA fix ahead of master
 def single_year_network_copy(
@@ -1068,3 +1110,34 @@ def single_year_network_copy(
         setattr(network, attr, getattr(n, attr))
 
     return network
+
+
+import numpy as np
+
+def get_first_last_day_positions():
+    """
+    Identify the positions of the first and last 24 hours of each month in a year
+    for an array of 8760 hours.
+
+    Returns:
+        dict: A dictionary with months (1-12) as keys and tuples (first_24h, last_24h)
+              as values. Each tuple contains the positions of the first and last 24 hours
+              for the corresponding month.
+    """
+    # Days in each month for a non-leap year
+    days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    hours_in_month = np.array(days_in_month) * 24
+
+    # Initialize positions
+    positions = {}
+    start = 0
+
+    for month, hours in enumerate(hours_in_month, start=1):
+        # Calculate positions for the first and last 24 hours
+        first_24h = list(range(start, start + 24))
+        last_24h = list(range(start + hours - 24, start + hours))
+        positions[month] = (first_24h, last_24h)
+        start += hours
+
+    return positions
+

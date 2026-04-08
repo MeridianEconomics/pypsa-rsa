@@ -3,47 +3,31 @@
 # coding: utf-8
 
 """
-Creates the network topology (buses and lines).
+main
+├── load_scenario_definition
+├── load_region_data
+│   └── joins population and GVA to region shapes
+├── build_regions
+│   └── check_centroid_in_region
+├── load_line_data
+│   ├── reads existing, planned, and user-defined lines
+│   └── build_line_topology
+│       └── maps line geometries to (bus0, bus1) using region geometries
+├── build_topology
+│   ├── calc_inter_region_lines
+│   │   ├── calc_line_limits
+│   │   └── group_inter_region
+│   │       └── apply_n1_approximation
+│   └── haversine_length
+├── extend_topology
+│   └── adds missing adjacency lines using centroids
+├── save_to_geojson / save_to_geopackage
+└── get_years
 
-Relevant Settings
------------------
-
-.. code:: yaml
-
-    snapshots:
-
-    electricity:
-        voltages:
-
-    lines:
-        types:
-        s_max_pu:
-        under_construction:
-
-    links:
-        p_max_pu:
-        under_construction:
-        include_tyndp:
-
-.. seealso::
-    Documentation of the configuration file ``config.yaml`` at
-    :ref:`snapshots_cf`, :ref:`toplevel_cf`, :ref:`electricity_cf`, :ref:`load_cf`,
-    :ref:`lines_cf`, :ref:`links_cf`, :ref:`transformers_cf`
-
-Inputs
-------
-
-- ``data/bundle/supply_regions/{regions}.shp``:  Shape file for different supply regions.
-- ``data/num_lines.xlsx``: confer :ref:`links`
-
-Outputs
--------
-- ``resources/buses_{regions}.geojson``
-- ``resources/lines_{regions}.geojson``
 
 """
 
-import networkx as nx
+#import networkx as nx
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString, Point
@@ -51,7 +35,7 @@ import logging
 import numpy as np
 from operator import attrgetter
 import os
-# import pypsa
+import pypsa
 import re
 from _helpers import save_to_geojson, load_scenario_definition
 from base_network import get_years
@@ -95,10 +79,10 @@ def load_line_data(line_config):
     lines = gpd.read_file(snakemake.input.existing_lines)
     lines = lines.to_crs(snakemake.config["gis"]["crs"]["distance_crs"])
     lines['status'] = 'existing'
-    lines["build_year"] = int(scenario_setup["simulation_years"][:4]) - 1
+    lines["build_year"] = int(SCENARIO_SETUP["capacity_expansion_years"][:4]) - 1
     lines.rename(columns={'DESIGN_VOL': 'voltage'}, inplace=True)
 
-    if "+tdp" in scenario_setup.loc['transmission_grid']:
+    if "+tdp" in SCENARIO_SETUP.loc['transmission_grid']:
         # Processing planned lines for each unique year
         planned_lines = gpd.read_file(snakemake.input.planned_lines)
         planned_lines = planned_lines.to_crs(snakemake.config["gis"]["crs"]["distance_crs"])
@@ -118,7 +102,7 @@ def load_line_data(line_config):
     lines = lines[["bus0","bus1","voltage","status","length","build_year"]]
 
     # Add user-defined lines
-    udl = scenario_setup.loc['transmission_grid'].split("+")
+    udl = SCENARIO_SETUP.loc['transmission_grid'].split("+")
     udl = [u for u in udl if u not in ['existing','tdp']]
     if len(udl) > 0:
         udl_scenario = udl[0]
@@ -355,19 +339,28 @@ if __name__ == "__main__":
         snakemake = mock_snakemake(
             'build_topology', 
             **{
-                'scenario':'IRP_REF_CI',
+                'scenario':'S1',
             }
         )
     logging.info("Loading scenario configuration")
 
-    scenario_setup = load_scenario_definition(snakemake)
+    SCENARIO_SETUP = load_scenario_definition(snakemake.wildcards.scenario, snakemake.config)
+    
+    # check if SCENARIO_SETUP is dataframe or series
+    if isinstance(SCENARIO_SETUP, pd.DataFrame):
+        SCENARIO_SETUP = SCENARIO_SETUP.iloc[0,:]
+        logging.warning("Multiple rows for simulation_years found in scenario definition. Using the first row.")
 
-    years = scenario_setup.loc["simulation_years"]
+    years = SCENARIO_SETUP.loc["simulation_years"]
+        
     if not isinstance(years, int):
-        years = list(map(int, re.split(r",\s*", years)))
+        if "range" in years:
+            years = list(eval(years))
+        else:
+            years = list(map(int, re.split(r",\s*", years)))
 
     logging.info("Loading region GIS data")
-    model_regions = str(int(scenario_setup.loc["regions"]))
+    model_regions = str(int(SCENARIO_SETUP.loc["regions"]))
     regions = load_region_data(model_regions)
 
     logging.info("Building regions")

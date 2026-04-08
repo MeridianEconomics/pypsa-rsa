@@ -1,40 +1,43 @@
+# Use of this code assumes you have accepted the license agreements under the license folder
 version: 0.1
+
+######################## SETUP INSTRUCTIONS ####################################
+
+# 1. First download all relevant data as outlined in the readme file
+# 2. Set the path under the gis section to the location of the GIS data
+# 3. Under the scenarios folder you can specify a project folder
+# 4. You need to specify the solver to be used. Capacity expansion modelling with multiple periods 
+#    typically requires a commercial solver like Gurobi, CPLEX or XPRESS.
+# 5. Dispatch modelling and smaller problems can use an open-source solver such as CBC or HIGHS.
+######################## CONFIGURATION FILE ####################################
 
 logging:
   level: INFO
   format: "%(levelname)s:%(name)s:%(message)s"
 
+random_seed: 174
+
 scenarios:
-  folder: ME IRP 2024
+  input_folder: scenarios
+  working_folder: Coal_Flexibilisation #kept only on local machine
   setup: "scenarios_to_run.xlsx"
 
-# # General inputs
-# data:
-#   resarea:
-#     redz: REDZ_DEA_Unpublished_Draft_2015
-#     corridors: Power_corridors
+data_paths:
+  cutout: 
+  bundle: "data"
 
 gis:
-  path: "data/bundle"
   # definition of the Coordinate Reference Systems
   crs:
-    geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. "EPSG:4326" is the standard used by OSM and google maps
-    distance_crs: EPSG:2049 # projection for distance measurements only. Possible recommended values are "EPSG:3857" (used by OSM and Google Maps)
-    area_crs: ESRI:54009  # projection for area measurements only. Possible recommended values are Global Mollweide "ESRI:54009"
+    geo_crs: EPSG:4326  # general geographic projection, not used for metric measures. 
+    distance_crs: EPSG:2049 # projection for distance measurements only
+    area_crs: ESRI:54009  # projection for area measurements only. 
 
 # Specification of relevent years for the model
 years: 
+  build_start_year: 2025 # used for build limits when starting year in the future e.g. starting in 2030
   reference_load_year: 2017  # should be a single year at present, could be extended in the future
   reference_weather_years: 
-    # reference years used for solar PV and wind profiles - can be single or multiple years
-    # if multiple years are specified these are applied sequencially to the simulation years
-    solar_pv: [2017, 2018, 2019]
-    solar_pv_low: [2017, 2018, 2019]
-    solar_pv_rooftop: [2017, 2018, 2019]
-    wind: [2017, 2018, 2019]
-    wind_low: [2017, 2018, 2019]
-    wind_offshore: [2017, 2018, 2019]
-    
     # reference years from actual Eskom data published at https://www.eskom.co.za/dataportal/ 
     # can be single or multiple years if multiple years are specified these are applied 
     # sequencially to the simulation years
@@ -44,7 +47,14 @@ years:
     hydro_import: [2021]
 
 electricity:
+  random_seed: 174
   load_disaggregation: "GVA_2016" # used to split the demand across supply regions in absence of Eskom data 
+  voll: false
+  elastic: false
+  elastic_pwl: false # piecewise-linear
+  inelastic: false
+  voll_share: false # share of VoLL in demand
+  
   renewable_generators:
     apply_grouping: false # if false individual existing plants are specified as separate generators
     resource_profiles:
@@ -64,35 +74,41 @@ electricity:
         solar_pv_rooftop: [1, ["RSA"],[1]]  
         solar_pv_low: [10, ["Mpumalanga", "Free State", "Limpopo", "North West"], [1, 1, 1, 1]] 
 
-
-    degradation_adj_capacity_factor: # adjust avg plant capacity factor down to account for degradation over lifetime in present value terms at 8.2% discount rate    
-      wind: 0.01
+    # stop gap implementation until degradation added into the model for wind and solar PV. 
+    degradation_adj_capacity_factor: # adjust avg plant capacity factor down by given % to account for degradation over lifetime in present value terms at 8.2% discount rate    
+      wind: 0.01 #i.e. 1% reduction in capacity factor over lifetime
       wind_low: 0.01
       wind_offshore: 0.01
       solar_pv: 0.03
       solar_pv_low: 0.03
       solar_pv_rooftop: 0.03
 
-  conventional_generators: # generator planned and unplanned outages are included based on Eskom data
-    apply_grouping: false # if false indivudal plants are specified as generators
-    implement_availability: true
+  conventional_generators: # e.g coal, nuclear, gas, diesel, hydro, biomass
+    apply_grouping: False # if false individual plants are specified as generators - feature still in development use with caution
+    share_partial_outages: 
+      coal: 0.5
+    endogenous_decomssioning_start_year: 2030
+    
+    implement_availability: True # exogenous specification of maximum 
+    # CCGT are modelled as an OCGT + an Aux STG 
     ccgt_st_to_gt_ratio: 0.427 # ratio of gas turbines output to steam turbines in CCGT plants 2x540MW OCGT for 1x461MW steam turbine
-    allowable_ocgt_st_carriers: ["ocgt_gas", "ocgt_diesel", "ocgt_gas_h2_40", "ocgt_gas_h2_45", "ocgt_gas_h2_50"] # only these techs can be connected to ST
-
+    # See excel sheet aux_stg_feed for allowable carriers to supply heat to the STG
+    linearised_unit_committment: ["coal"] # False #["coal"] # or False
   storage:
     apply_grouping: false # if false indivudal plants are specified
-    
+
   extendable_parameters:
     defaults:
-      discount_rate: 0.082
-      co2_emissions: 0
+      #discount_rate: 0.082 now links to global discount rate set in secnarios worksheet
+      carrier_emissions: 0
       max_hours: 0
       FOM: 0
       VOM: 0
       heat_rate: 0
       efficiency: 1
       fuel: 0
-      investment: 0
+      overnight_capex: 0
+      total_vs_overnight_capex_ratio: 1
       lifetime: 20
       min_stable_level: 0
       ramp_limit_up: .nan
@@ -103,22 +119,29 @@ electricity:
       min_down_time: 0
       start_up_cost: 0
       shut_down_cost: 0
+      committable: False
       build_phase_in: overnight
+
+    smooth_build:
+      start_year: 2031
+      smooth_years: range(2030, 2061, 5)
+      forced_build: 0.8
+      carriers: ["wind", "wind_low", "solar_pv", "solar_pv_low"]
+
 
   adjust_by_p_max_pu: #adjusts ramp limit and p_min_pu by outages representated by p_max_pu
     coal: [ramp_limit_up, ramp_limit_down]
-    nuclear: [ramp_limit_up, ramp_limit_down] # leave empty to ignore #can add p_min_pu here as well
-  
-  clean_pu_profiles: true # if true, if p_max_pu is less than p_min_pu in any hour it is set to p_min_pu
+    nuclear: [ramp_limit_up, ramp_limit_down] 
 
-  operating_reserves:
-      spinning: ["coal", "nuclear", "phs", "biomass", "hydro", "hydro_import"]
-      non_spinning: ["coal", "ocgt_diesel", "ocgt_gas", "ccgt_gas", "phs", "biomass", "hydro", "hydro_import"]
+  clean_pu_profiles: true # if true, if p_max_pu is less than p_min_pu in any hour it is set to p_min_pu  
+  min_ramp_limit_threshold: 0.05
+
+  operating_reserve_carriers: ["coal", "nuclear", "ocgt_diesel", "ocgt_avf", "ocgt_gas", "ocgt_gas_h2_40","ocgt_gas_h2_45","ocgt_gas_h2_50","ocgt_gas_h2_55","ocgt_gas_h2_60", "ccgt_steam", "biomass", "hydro"] # all storage is assumed by default
   
-  dispatch_committable_carriers:
-    existing: [coal]
-    extended: [coal, ccgt_steam]
-  
+  extendable_committable_carriers_for_dispatch:
+    extended: [coal, nuclear, ccgt_steam]
+
+  allow_over_generation: True
 lines:
   threshold: 220 # only voltages >=220kV are considered in network capacity calculations
   v_nom: 400. #changed from 380kV from PyPSA-EUR to 400kV for South Africa
@@ -136,14 +159,12 @@ lines:
     400: 602  #(MW) 
     765: 2280 #(MW) 
   s_max_pu: 0.7 # n-1 approximation
-  n1_approx_single_lines: 0.7
+  n1_approx_single_lines: 0.7 # in cases where there is a single line between 2 region derate by 30%
   s_nom_max: .inf
   length_factor: 1.25
   no_build_year: 2050 # or set as "drop" to remove lines
   losses: 0.06 #per 1000km AC line - requires to links per line unless set to 0 then bi-directional lossless link
   dc_type: "DC_custom_linetype"
-  #status: ["existing"] # "zero": set capacity to zero, "remove": remove, "keep": with full capacity
-  extend_topology: true # if true, lines between adjacent regions that do not exist are added for expansion
 
 links:
   p_max_pu: 1.0
@@ -152,13 +173,13 @@ links:
   length_factor: 1.25
 
 costs:
-  # costs come from data/technology_costs.xlsx
-  discount_rate: 0.082
+  #discount_rate: 0.082
   year: 2030
   USD_to_ZAR: 18.24
   EUR_to_ZAR: 17.83
 
-  load_shedding: 100000 #R100/kWh
+  load_shedding: true
+  COUE: 100000 #R100/kWh Cost Of Unserved Energy
 
   emission_prices: # only used with the option Ep (emission prices)
     # Externality costs from Integrated Energy Plan by the ZA DOE
@@ -167,19 +188,46 @@ costs:
     nox: 4.5e+3
     hg: 41484.e-6 # is also part of the excel sheet
     particulate: 11.3e+3
+  noisy_costs: True
 
 tsam_clustering:
-  nprocesses: 10
-  solver: "highs" #need to use open source solver here due to parallel processing of years
+  nprocesses: 1
+  solver: "cbc" #need to use open source solver here due to parallel processing of years
  
-solving:
-  tmpdir: /tmp
+solver:
   options:
     clip_p_max_pu: 1.e-2
-    load_shedding: true
-  solver:
-      name: highs
-      LpMethod: 0
-      Threads: 5
-      Presolve: 1
-      Crossover: 0
+  copt:
+    name: copt
+    LpMethod: 2
+    Crossover: 0 
+    #Threads: 10
+    BarIterLimit: 50000
+    #FeasTol: 1e-4
+    #DualTol: 1e-4
+    #BarPrimalTol: 1e-6
+    #BarDualTol: 1e-6
+    #BarGapTol: 1e-6
+    #RelGap: 1
+    #AbsGap: 1e5
+    BarHomogeneous: 0
+    #MatrixTol: 1e-7
+    keep_files: True
+
+
+  mindopt:
+    name: mindopt
+    Method: 2
+    SolutionTarget: 1
+    NumThreads: 10
+    IPM/PrimalTolerance: 1e-6
+    IPM/DualTolerance: 1e-6
+    IPM/GapTolerance: 1e-6
+    IPM/MaxIterations: 50000
+    SPX/MaxIterations: 50000
+
+  highs:
+    name: highs
+    solver: ipm
+    run_crossover: on
+    ipm_optimality_tolerance: 1e-5

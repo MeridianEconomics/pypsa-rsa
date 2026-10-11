@@ -4,7 +4,7 @@ __pycache__
 
 ~$*
 **/.vscode/
-
+spec/*
 archive/*
 benchmarks/*
 cutouts/*

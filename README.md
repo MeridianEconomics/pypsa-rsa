@@ -39,7 +39,10 @@ segmentation through the open-source [Time Series Aggregation Module (TSAM)]( ht
 # Resources to get started
 PyPSA-RSA is built upon the fundamental components in the [PyPSA library](https://pypsa.org/). Before starting to use this model it is highly recommended to explore the [PyPSA documentation](https://pypsa.readthedocs.io/en/latest/index.html). More detailed documentation can be found under our [readthedocs](https://pypsa-za.readthedocs.io/en/latest/). A two-part video series on using PyPSA and PyPSA-RSA can be found under [link](https://meridianeconomics.co.za/our-publications/pypsa-rsa-workshop1/). Please feel free to join our [Discord channel](https://discord.gg/bsdHkHwujt) to ask questions. 
 
-PyPSA-RSA assembles the mathematical equations that need to be solved to generate a result. Whilst open-source solvers such as [HiGHS](https://highs.dev/) and [CBC](https://github.com/coin-or/Cbc) can be used to solve smaller problems, a commercial solver is likely to be required for multi-horizon capacity expansion models. Suitable options include:
+PyPSA-RSA assembles the mathematical equations that need to be solved to generate a result. The model runs on open-source solvers: [HiGHS](https://highs.dev/), [CBC](https://github.com/coin-or/Cbc), [GLPK](https://www.gnu.org/software/glpk/) and [SCIP](https://scipopt.org/) are all configured in `config.yaml`, and HiGHS is the default. HiGHS installs as a Python package (`highspy`) and runs in-process, so it needs no separate executable; CBC, GLPK and SCIP are command-line solvers and their binaries must be on `PATH`.
+
+A scenario names its solver in the `solver` column of `scenarios_to_run.xlsx`, or falls back to `solver.default` in `config.yaml` when that column is absent. Commercial solvers remain an option for large multi-horizon capacity expansion models, and are configured the same way:
+
 - [Gurobi](https://www.gurobi.com/) 
 - [IBM CPLEX](https://www.ibm.com/products/ilog-cplex-optimization-studio/cplex-optimizer)
 - [FICO Xpress](https://www.fico.com/en/products/fico-xpress-optimization)

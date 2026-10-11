@@ -9,10 +9,34 @@ import numpy as np
 
 scenarios = pd.read_excel(
     os.path.join("scenarios",config["scenarios"]["working_folder"], config["scenarios"]["setup"]),
-    sheet_name="scenario_definition", 
+    sheet_name="scenario_definition",
     index_col=0
 )
+
+# Current workbooks carry the scenario id in a `scenario` column; the legacy ones
+# use `wildcard`, which index_col=0 has already promoted to the index. Resolve
+# the id by name so the DAG builds for either layout, and never let a missing
+# identifier pass silently.
+scenario_id_column = next(
+    (c for c in ("scenario", "wildcard") if c in scenarios.columns), None
+)
+if scenario_id_column is not None:
+    scenarios["scenario"] = scenarios[scenario_id_column]
+elif scenarios.index.name in ("scenario", "wildcard"):
+    scenarios["scenario"] = scenarios.index
+else:
+    raise KeyError(
+        "scenario_definition has no scenario identifier column; expected "
+        f"'scenario' or 'wildcard', found {list(scenarios.columns)[:8]}"
+    )
+
 scenarios_to_run = scenarios[(scenarios["run_scenario"]==1)]
+if scenarios_to_run.empty:
+    raise ValueError(
+        f"No scenario in {config['scenarios']['working_folder']}/"
+        f"{config['scenarios']['setup']} has run_scenario set; there is nothing "
+        "to build. Set run_scenario=True on at least one row."
+    )
 
 
 ############################################################################################################

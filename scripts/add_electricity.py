@@ -145,9 +145,7 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import pandas as pd
 import pypsa
-from pypsa.descriptors import get_switchable_as_dense as get_as_dense, get_activity_mask
 from concurrent.futures import ProcessPoolExecutor
-from pypsa.io import import_components_from_dataframe
 import os
 from shapely.geometry import Point
 import xarray as xr
@@ -212,7 +210,7 @@ def load_extendable_parameters(n, SCENARIO_SETUP, snakemake):
     set all asset costs tab in the model file
     """
     defaults = snakemake.config["electricity"]["extendable_parameters"]["defaults"]
-    ext_years = get_investment_periods(n.snapshots, n.multi_invest)
+    ext_years = get_investment_periods(n.snapshots, n.has_investment_periods)
     ext_years_array = np.array(ext_years)
 
     param_mapping = pd.read_excel(
@@ -344,7 +342,7 @@ def attach_load(n, SCENARIO_SETUP):
     annual_load = annual_load.drop(["units","source"]).T*1e6
     profile_load = normed(remove_leap_day(load.loc[str(snakemake.config["years"]["reference_load_year"]),"system_energy"]))
     
-    if n.multi_invest:
+    if n.has_investment_periods:
         load=pd.Series(0,index=n.snapshots)
         for y in n.investment_periods:
             load.loc[y]=profile_load.values*annual_load.loc[y]
@@ -356,7 +354,7 @@ def attach_load(n, SCENARIO_SETUP):
             bus="RSA",
             p_set=load)
     else:
-        n.madd("Load", list(n.buses.index),
+        n.add("Load", list(n.buses.index),
             bus = list(n.buses.index),
             p_set = load_disaggregate(load, normed(n.buses[snakemake.config["electricity"]["load_disaggregation"]])))
 
@@ -445,7 +443,7 @@ def get_eaf_profiles(snapshots, type):
 
 def clip_pu_profiles(n, pu, gen_list, lower=0, upper=1):
     n.generators_t[pu] = n.generators_t[pu].copy()
-    n.generators_t[pu].loc[:, gen_list] = get_as_dense(n, "Generator", pu)[gen_list].clip(lower=lower, upper=upper)
+    n.generators_t[pu].loc[:, gen_list] = n.get_switchable_as_dense("Generator", pu)[gen_list].clip(lower=lower, upper=upper)
 
 def proj_eaf_override(pclf, uoclf, snapshots, include="_EAF", exclude="extendable"):
     """
@@ -532,7 +530,7 @@ def generate_eskom_re_profiles(n, carriers):
     enable:
         use_eskom_wind_solar
     """
-    ext_years = get_investment_periods(n.snapshots, n.multi_invest)
+    ext_years = get_investment_periods(n.snapshots, n.has_investment_periods)
     ref_years = snakemake.config["years"]["reference_weather_years"]
     carriers = [elem for elem in carriers if not elem.startswith(("wind","solar_pv"))]
 
@@ -549,11 +547,11 @@ def generate_eskom_re_profiles(n, carriers):
 
     for carrier in carriers:
         weather_years = ref_years[carrier].copy()
-        if n.multi_invest:
+        if n.has_investment_periods:
             weather_years *= int(np.ceil(len(ext_years) / len(weather_years)))
 
         for cnt, y in enumerate(ext_years):
-            y = y if n.multi_invest else str(y)
+            y = y if n.has_investment_periods else str(y)
             eskom_profiles.loc[y, carrier] = (eskom_data.loc[str(weather_years[cnt]), carrier]
                                             .clip(lower=0., upper=1.)).values
     return eskom_profiles
@@ -800,7 +798,7 @@ def group_components(component_df, attrs):
     return grouped_df, non_grouped_df
 
 def apply_variable_fuel_prices_for_fixed_generators(n, gens):
-    years = get_investment_periods(n.snapshots, n.multi_invest)
+    years = get_investment_periods(n.snapshots, n.has_investment_periods)
     # Apply variable marginal costs as specified in conventional_annual spreadsheet
     var_fuel_price =  find_string_entries(gens["fuel_price"])
     
@@ -820,7 +818,7 @@ def apply_variable_fuel_prices_for_fixed_generators(n, gens):
 
 
 def apply_variable_vom_for_storage(n, st, _type):
-    years = get_investment_periods(n.snapshots, n.multi_invest)
+    years = get_investment_periods(n.snapshots, n.has_investment_periods)
 
     # base VOM and specified extendable parameters
     ext_param = load_extendable_parameters(n, SCENARIO_SETUP, snakemake)
@@ -838,7 +836,7 @@ def apply_variable_vom_for_storage(n, st, _type):
 
 
 def apply_emissions_for_fixed_generators(n, gens, conv_carriers):
-    years = get_investment_periods(n.snapshots, n.multi_invest)
+    years = get_investment_periods(n.snapshots, n.has_investment_periods)
     carbon_tax = pd.read_excel(
         os.path.join(SCENARIO_SETUP["sub_path"], "emissions.xlsx"),
         sheet_name="carbon_tax",
@@ -916,14 +914,14 @@ def apply_phased_decommissioning(n):
         
 def attach_fixed_generators(n, carriers):
     # setup carrier info
-    gen_attrs = n.component_attrs["Generator"]
+    gen_attrs = n.components["Generator"].defaults
     conv_carriers = carriers["fixed"]["conventional"]
     re_carriers = carriers["fixed"]["renewables"]
     carriers = conv_carriers + re_carriers
 
-    start_year = get_start_year(n.snapshots, n.multi_invest)
-    end_year = get_end_year(n.snapshots, n.multi_invest)
-    snapshots = get_snapshots(n.snapshots, n.multi_invest)
+    start_year = get_start_year(n.snapshots, n.has_investment_periods)
+    end_year = get_end_year(n.snapshots, n.has_investment_periods)
+    snapshots = get_snapshots(n.snapshots, n.has_investment_periods)
 
     # load generators from model file
     gens = load_fixed_components(carriers, start_year, end_year, snakemake.config["electricity"], "Generator")
@@ -967,8 +965,8 @@ def attach_fixed_generators(n, carriers):
     grouped_gens["p_nom_extendable"] = False
     non_grouped_gens["p_nom_extendable"] = False
 
-    n.import_components_from_dataframe(drop_non_pypsa_attrs(n, "Generator", non_grouped_gens), "Generator")
-    n.import_components_from_dataframe(drop_non_pypsa_attrs(n, "Generator", grouped_gens), "Generator")
+    n._import_components_from_df(drop_non_pypsa_attrs(n, "Generator", non_grouped_gens), "Generator")
+    n._import_components_from_df(drop_non_pypsa_attrs(n, "Generator", grouped_gens), "Generator")
     #grouped_gens = drop_non_pypsa_attrs(n, "Generator", grouped_gens)
     #non_grouped_gens = drop_non_pypsa_attrs(n, "Generator", non_grouped_gens)
     #n.add("Generator", non_grouped_gens.index, **non_grouped_gens)
@@ -1061,7 +1059,7 @@ def define_extendable_tech(carriers, years, type_, ext_param):
 
 
 def apply_variable_fuel_costs_for_extendable_generators(n, ext_param, conv_carriers):
-    years = get_investment_periods(n.snapshots, n.multi_invest)
+    years = get_investment_periods(n.snapshots, n.has_investment_periods)
     gen_list = n.generators.query("carrier in @conv_carriers & p_nom_extendable").index
     #fuel_cost = ext_param.loc["fuel", years]
     marginal_cost = pd.DataFrame(index = n.snapshots, columns = gen_list, dtype=float)
@@ -1084,7 +1082,7 @@ def apply_variable_fuel_costs_for_extendable_generators(n, ext_param, conv_carri
         n.generators_t.marginal_cost[gen] = marginal_cost[gen].values
 
 def apply_emissions_for_extendable_generators(n, param, conv_carriers):
-    years = get_investment_periods(n.snapshots, n.multi_invest)
+    years = get_investment_periods(n.snapshots, n.has_investment_periods)
     carbon_tax = pd.read_excel(
         os.path.join(SCENARIO_SETUP["sub_path"], "emissions.xlsx"),
         sheet_name="carbon_tax",
@@ -1116,14 +1114,14 @@ def apply_emissions_for_extendable_generators(n, param, conv_carriers):
     return gen_emissions
 
 def attach_extendable_generators(n, carriers):
-    gen_attrs = n.component_attrs["Generator"]
+    gen_attrs = n.components["Generator"].defaults
     config = snakemake.config["electricity"]
     
     conv_carriers = carriers["extendable"]["conventional"]
     re_carriers = carriers["extendable"]["renewables"]
 
-    ext_years = get_investment_periods(n.snapshots, n.multi_invest)
-    snapshots = get_snapshots(n.snapshots, n.multi_invest)
+    ext_years = get_investment_periods(n.snapshots, n.has_investment_periods)
+    snapshots = get_snapshots(n.snapshots, n.has_investment_periods)
 
     ext_param = load_extendable_parameters(n, SCENARIO_SETUP, snakemake)
     ext_gens_list = define_extendable_tech(carriers, ext_years, "Generator", ext_param) 
@@ -1153,7 +1151,7 @@ def attach_extendable_generators(n, carriers):
     gens = set_annual_build_limits(gens, ext_years, "Generator")
     gens["committable"] = False
 
-    n.import_components_from_dataframe(gens, "Generator")
+    n._import_components_from_df(gens, "Generator")
     #n.add("Generator", gens.index, **gens)
     n.generators["plant_name"] = n.generators.index.str.split("*").str[0]
 
@@ -1259,7 +1257,7 @@ def set_extendable_params(c, bus_carrier_years, ext_param, **config):
         #component_df = pd.concat([component_df, pd.DataFrame(index = bus_carrier_years, columns = uc_param)],axis=1)
         for param in default_col:
             component_df[param] =  component_df.apply(lambda row: ext_param.loc[(param, row["carrier"]), row["build_year"]], axis=1)
-            component_df = apply_default_attr(component_df, n.component_attrs[c], snakemake)
+            component_df = apply_default_attr(component_df, n.components[c].defaults, snakemake)
     elif c == "StorageUnit":
         for param in default_col:
             component_df[param] =  component_df.apply(lambda row: ext_param.loc[(param, row["carrier"]), row["build_year"]], axis=1)
@@ -1275,7 +1273,7 @@ def set_extendable_params(c, bus_carrier_years, ext_param, **config):
 
 def apply_extendable_phase_in(n):
     param = load_extendable_parameters(n, SCENARIO_SETUP, snakemake).loc["build_phase_in"]
-    pu_max = get_as_dense(n, "Generator", "p_max_pu")
+    pu_max = n.get_switchable_as_dense("Generator", "p_max_pu")
     ext_i = n.generators.query("p_nom_extendable").index
     
     phase_in = pd.DataFrame(1, index =range(8760), columns = ["overnight", "linear", "quarterly"], dtype=float) 
@@ -1321,16 +1319,16 @@ def set_hourly_coal_generation_threshold(n):
     for carrier in carrier_list:
         gen_list = n.generators.query("carrier == @carrier").index
         for y in n.investment_periods:
-            n.generators_t.p_min_pu.loc[y, gen_list] = get_as_dense(n, "Generator", "p_min_pu")[gen_list].clip(lower=min_pu_override.loc[carrier, y])
+            n.generators_t.p_min_pu.loc[y, gen_list] = n.get_switchable_as_dense("Generator", "p_min_pu")[gen_list].clip(lower=min_pu_override.loc[carrier, y])
 
 def set_coal_msl(n):
     cl = n.generators.query("carrier in ['coal','sasol_coal']").index
     coal_msl = SCENARIO_SETUP["override_coal_msl"] 
 
     if coal_msl in ["NA", "None", "none"]:
-        n.generators_t.p_min_pu[cl] = get_as_dense(n, "Generator", "p_min_pu")[cl]  *  get_as_dense(n, "Generator", "p_max_pu")[cl]        
+        n.generators_t.p_min_pu[cl] = n.get_switchable_as_dense("Generator", "p_min_pu")[cl]  *  n.get_switchable_as_dense("Generator", "p_max_pu")[cl]        
     else:
-        n.generators_t.p_min_pu[cl] = coal_msl *  get_as_dense(n, "Generator", "p_max_pu")[cl]
+        n.generators_t.p_min_pu[cl] = coal_msl *  n.get_switchable_as_dense("Generator", "p_max_pu")[cl]
 
 """
 ********************************************************************************
@@ -1339,8 +1337,8 @@ def set_coal_msl(n):
 """
 def attach_fixed_storage(n, carriers): 
     carriers = carriers["fixed"]["storage"]
-    start_year = get_start_year(n.snapshots, n.multi_invest)
-    end_year = get_end_year(n.snapshots, n.multi_invest)
+    start_year = get_start_year(n.snapshots, n.has_investment_periods)
+    end_year = get_end_year(n.snapshots, n.has_investment_periods)
     
     storage = load_fixed_components(carriers, start_year, end_year, snakemake.config["electricity"], "StorageUnit")
     storage = map_components_to_buses(storage, snakemake.input.supply_regions, snakemake.config["gis"]["crs"])
@@ -1351,7 +1349,7 @@ def attach_fixed_storage(n, carriers):
     storage["p_min_pu"] = -1
 
     storage = drop_non_pypsa_attrs(n, "StorageUnit", storage)
-    n.import_components_from_dataframe(storage, "StorageUnit")
+    n._import_components_from_df(storage, "StorageUnit")
 
     if SCENARIO_SETUP["variable_storage_vom"]:
         apply_variable_vom_for_storage(n, storage, "fixed")
@@ -1361,7 +1359,7 @@ def attach_fixed_storage(n, carriers):
 def attach_extendable_storage(n, carriers):
     st_carriers = carriers["extendable"]["storage"]
     config = snakemake.config["electricity"]
-    ext_years = get_investment_periods(n.snapshots, n.multi_invest)
+    ext_years = get_investment_periods(n.snapshots, n.has_investment_periods)
     ext_param = load_extendable_parameters(n, SCENARIO_SETUP, snakemake)
     ext_storage_list = define_extendable_tech(carriers, ext_years, "StorageUnit", ext_param)
     storage = set_extendable_params("StorageUnit", ext_storage_list, ext_param, **config)
@@ -1370,7 +1368,7 @@ def attach_extendable_storage(n, carriers):
     storage = set_annual_build_limits(storage, ext_years, "StorageUnit")
 
     if len(ext_storage_list):
-        n.import_components_from_dataframe(storage, "StorageUnit")
+        n._import_components_from_df(storage, "StorageUnit")
         #n.add("StorageUnit", storage.index, **storage)
 
     if SCENARIO_SETUP["variable_storage_vom"]:
@@ -1380,7 +1378,7 @@ def attach_extendable_storage(n, carriers):
 
 def adjust_com_msl(n):
     com_i = n.generators.query("committable").index
-    n.generators_t.p_min_pu[com_i] = get_as_dense(n, "Generator", "p_min_pu")[com_i] * get_as_dense(n, "Generator", "p_max_pu")[com_i]
+    n.generators_t.p_min_pu[com_i] = n.get_switchable_as_dense("Generator", "p_min_pu")[com_i] * n.get_switchable_as_dense("Generator", "p_max_pu")[com_i]
     n.generators.loc[com_i, "p_min_pu"] = 0
 
 """
@@ -1391,11 +1389,11 @@ def adjust_com_msl(n):
 
 
 def check_pu_profiles(n, clean_flag):
-    p_max_pu = get_as_dense(n, "Generator", "p_max_pu")
-    p_min_pu = get_as_dense(n, "Generator", "p_min_pu")
+    p_max_pu = n.get_switchable_as_dense("Generator", "p_max_pu")
+    p_min_pu = n.get_switchable_as_dense("Generator", "p_min_pu")
 
-    ramp_limit_up= get_as_dense(n, "Generator", "ramp_limit_up")
-    ramp_limit_down = get_as_dense(n, "Generator", "ramp_limit_down")
+    ramp_limit_up= n.get_switchable_as_dense("Generator", "ramp_limit_up")
+    ramp_limit_down = n.get_switchable_as_dense("Generator", "ramp_limit_down")
 
     p_max_pu[p_max_pu < 0.01] = 0 # Set all values below 1% to 0 for numerical stability
     p_min_pu[p_min_pu < 0.01] = 0 # Set all values below 1% to 0 for numerical stability
@@ -1416,27 +1414,30 @@ def check_pu_profiles(n, clean_flag):
 
     if (n.generators.committable==True).any():
         try:
-            ramp_limit_start_up = get_as_dense(n, "Generator", "ramp_limit_start_up")
-            ramp_limit_shut_down = get_as_dense(n, "Generator", "ramp_limit_shut_down")
+            ramp_limit_start_up = n.get_switchable_as_dense("Generator", "ramp_limit_start_up")
+            ramp_limit_shut_down = n.get_switchable_as_dense("Generator", "ramp_limit_shut_down")
         except:
             ramp_limit_start_up = n.generators.ramp_limit_start_up
             ramp_limit_shut_down = n.generators.ramp_limit_shut_down
 
+        # ramp_limit_start_up and ramp_limit_shut_down are static floats that
+        # PyPSA reads from n.generators, so the repair has to land there. The
+        # dense frame is collapsed over snapshots to the worst hour.
         errors = ramp_limit_start_up < p_min_pu
         error_lst = errors.any()
         if errors.any().any() and clean_flag:
             logging.info(f"Adjusting by start_up limits to match min_stable_level to avoid infeasibilities for the following generators {list(error_lst[error_lst].index)}")
             try:
-                n.generators_t.ramp_limit_start_up = ramp_limit_start_up.where(~errors, p_min_pu)
+                n.generators.ramp_limit_start_up = ramp_limit_start_up.where(~errors, p_min_pu).max()
             except:
                 n.generators.ramp_limit_start_up = p_min_pu.max()
 
-        errors = ramp_limit_start_up < p_min_pu
+        errors = ramp_limit_shut_down < p_min_pu
         error_lst = errors.any()
         if errors.any().any() and clean_flag:
             logging.info(f"Adjusting by shut_down limits to match min_stable_level to avoid infeasibilities for the following generators {list(error_lst[error_lst].index)}")
             try:
-                n.generators_t.ramp_limit_shut_down = ramp_limit_shut_down.where(~errors, p_min_pu)
+                n.generators.ramp_limit_shut_down = ramp_limit_shut_down.where(~errors, p_min_pu).max()
             except:
                 n.generators.ramp_limit_shut_down = p_min_pu.max()
 
@@ -1455,7 +1456,7 @@ def check_pu_profiles(n, clean_flag):
     if errors.any().any() and clean_flag:
         logging.info(f"Adjusting minimum ramp down limits to 5% to avoid infeasibilities for the following generators {list(error_lst[error_lst].index)}")
         try:
-            n.generators_t.ramp_limit_shut_down = ramp_limit_down.where(~errors, 0.05)
+            n.generators_t.ramp_limit_down = ramp_limit_down.where(~errors, 0.05)
         except:
             pass
 
@@ -1483,14 +1484,14 @@ def add_nice_carrier_names(n):
 def add_load_shedding(n, cost):
     n.add("Carrier", "load_shedding")
     buses_i = n.buses.index
-    n.madd(
+    n.add(
         "Generator",
         buses_i,
         "-load_shedding",
         bus = buses_i,
         p_nom = 1e6,  # MW
         carrier = "load_shedding",
-        build_year = get_start_year(n.snapshots, n.multi_invest),
+        build_year = get_start_year(n.snapshots, n.has_investment_periods),
         lifetime = 100,
         marginal_cost = cost,
     )
@@ -1556,7 +1557,7 @@ def single_year_segmentation(n, snapshots, segments, config):
             cumsum = np.where(cumsum >= 1416, cumsum + 24, cumsum) # 1416h from start year to Feb 29
     
     offsets = np.insert(cumsum, 0, 0)
-    start_snapshot = snapshots[0][1] if n.multi_invest else snapshots[0]
+    start_snapshot = snapshots[0][1] if n.has_investment_periods else snapshots[0]
     snapshots = pd.DatetimeIndex([start_snapshot + pd.Timedelta(hours=offset) for offset in offsets])
     snapshots = pd.MultiIndex.from_arrays([snapshots.year, snapshots]) if multi_index else snapshots
     weightings = pd.Series(weightings, index=snapshots, name="weightings", dtype="float64")
@@ -1572,7 +1573,7 @@ def single_year_segmentation(n, snapshots, segments, config):
 
 def apply_time_segmentation(n, segments, config):
     logging.info(f"Aggregating time series to {segments} segments.")    
-    years = n.investment_periods if n.multi_invest else [n.snapshots[0].year]
+    years = n.investment_periods if n.has_investment_periods else [n.snapshots[0].year]
 
     if len(years) == 1:
         segmented_df, weightings = single_year_segmentation(n, n.snapshots, segments, config)
@@ -1733,7 +1734,7 @@ if __name__ == "__main__":
 
     add_missing_carriers(n)
 
-    if n.multi_invest:
+    if n.has_investment_periods:
         initial_ramp_rate_fix(n)
     logging.info("Exporting network.")
 

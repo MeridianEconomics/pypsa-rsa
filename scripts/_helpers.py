@@ -2,16 +2,15 @@
 # # SPDX-License-Identifier: MIT
 # -*- coding: utf-8 -*-
 
+import logging
 import os
+import re
 from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from pypsa.descriptors import get_switchable_as_dense as get_as_dense
-from pypsa.descriptors import get_activity_mask, get_active_assets
-from pypsa.io import import_components_from_dataframe
 
 import socket
 
@@ -77,7 +76,7 @@ def add_missing_carriers(n):
     )
 
     missing_carriers = pd.Index(all_carriers).difference(n.carriers.index)
-    n.madd("Carrier", missing_carriers)
+    n.add("Carrier", missing_carriers)
 
 """
 List of IO functions
@@ -187,7 +186,7 @@ def load_network(import_name=None, custom_components=None):
     pypsa.Network
     """
     import pypsa
-    from pypsa.descriptors import Dict
+    from pypsa.definitions.structures import Dict
 
     override_components = None
     override_component_attrs = None
@@ -292,11 +291,11 @@ def aggregate_capacity(n):
     carriers=n.generators.carrier.unique()
     carriers = carriers[carriers !='load_shedding']
     for y in n.investment_periods:
-        capacity.loc[carriers,y]=n.generators.p_nom_opt[(n.get_active_assets('Generator',y))].groupby(n.generators.carrier).sum()
+        capacity.loc[carriers,y]=n.generators.p_nom_opt[(n.components['Generator'].get_active_assets(y))].groupby(n.generators.carrier).sum()
 
     carriers=n.storage_units.carrier.unique()
     for y in n.investment_periods:
-        capacity.loc[carriers,y]=n.storage_units.p_nom_opt[(n.get_active_assets('StorageUnit',y))].groupby(n.storage_units.carrier).sum()
+        capacity.loc[carriers,y]=n.storage_units.p_nom_opt[(n.components['StorageUnit'].get_active_assets(y))].groupby(n.storage_units.carrier).sum()
 
     capacity.loc['ocgt',:]=capacity.loc['ocgt_gas',:]+capacity.loc['ocgt_diesel',:]
 
@@ -404,17 +403,17 @@ def aggregate_costs(n):
         if c.df.empty:
             continue
     
-        if n._multi_invest:
+        if n.has_investment_periods:
             active = pd.concat(
                 {
-                    period: get_active_assets(n, c.name, period)
+                    period: n.components[c.name].get_active_assets(period)
                     for period in n.snapshots.unique("period")
                 },
                 axis=1,
             )
         if c.name not in ["Line", "Transformer"]: 
             marginal_costs = (
-                    get_as_dense(n, c.name, "marginal_cost", n.snapshots)
+                    n.get_switchable_as_dense(c.name, "marginal_cost", n.snapshots)
                     .mul(n.snapshot_weightings.objective, axis=0)
             )
 
@@ -479,9 +478,9 @@ def get_aggregation_strategies(aggregation_strategies):
     when custom values are specified in the config.
     """
     import numpy as np
-    from pypsa.networkclustering import _make_consense
+    from pypsa.clustering.spatial import make_consense
 
-    bus_strategies = dict(country=_make_consense("Bus", "country"))
+    bus_strategies = dict(country=make_consense("Bus", "country"))
     bus_strategies.update(aggregation_strategies.get("buses", {}))
 
     generator_strategies = {"build_year": lambda x: 0, "lifetime": lambda x: np.inf}
@@ -763,10 +762,14 @@ def drop_non_pypsa_attrs(n, c, df):
 
 def normalize_and_rename_df(df, snapshots, fillna, suffix=None):
     df = df.loc[snapshots]
-    df = (df / df.max()).fillna(fillna)
+    # Capture the maxima before dividing, and rename them alongside the columns
+    # so the caller can de-normalise a frame whose columns carry the suffix.
+    maxima = df.max()
+    df = (df / maxima).fillna(fillna)
     if suffix:
         df.columns += f'_{suffix}'
-    return df, df.max()
+        maxima.index += f'_{suffix}'
+    return df, maxima
 
 def find_string_entries(series):
     return series[series.apply(lambda x: isinstance(x, str))]#.index
@@ -776,9 +779,11 @@ def find_non_string_entries(series):
 
 def assign_segmented_df_to_network(df, search_str, replace_str, target):
     cols = df.columns[df.columns.str.contains(search_str)]
-    segmented = df[cols]
+    segmented = df[cols].copy()
     segmented.columns = segmented.columns.str.replace(search_str, replace_str)
-    target = segmented
+    # Write into the caller's frame in place; rebinding the name here would
+    # leave the network untouched.
+    target[segmented.columns] = segmented
 
 
 def get_start_year(sns, multi_invest):
@@ -799,11 +804,11 @@ def adjust_by_p_max_pu(n, config):
         non_com_i = n.generators.query("carrier == @carrier & committable == False").index
         for p in config[carrier]:
             n.generators.loc[com_i, p] = (
-                n.generators.loc[com_i, p] * get_as_dense(n, "Generator", "p_max_pu")[com_i].mean()
+                n.generators.loc[com_i, p] * n.get_switchable_as_dense("Generator", "p_max_pu")[com_i].mean()
             )
 
             n.generators_t[p][non_com_i] = (
-                get_as_dense(n, "Generator", p)[non_com_i] * get_as_dense(n, "Generator", "p_max_pu")[non_com_i]
+                n.get_switchable_as_dense("Generator", p)[non_com_i] * n.get_switchable_as_dense("Generator", "p_max_pu")[non_com_i]
             )
      
 
@@ -812,8 +817,8 @@ def initial_ramp_rate_fix(n):
     Under certain conditions the ramp rates of the generators between periods can lead to infeasibilities. 
     This function sets the ramp rates of the first snapshot in each period to 1 to avoid this scenario.
     """
-    ramp_up_dense = get_as_dense(n, "Generator", "ramp_limit_up")
-    ramp_down_dense = get_as_dense(n, "Generator", "ramp_limit_down")
+    ramp_up_dense = n.get_switchable_as_dense("Generator", "ramp_limit_up")
+    ramp_down_dense = n.get_switchable_as_dense("Generator", "ramp_limit_down")
     
     for y in n.investment_periods:
         first_sns = (y, f"{y}-01-01 00:00:00")
@@ -823,7 +828,7 @@ def initial_ramp_rate_fix(n):
     n.generators_t.ramp_limit_up = ramp_up_dense
     n.generators_t.ramp_limit_down = ramp_down_dense
 
-    #p_min_pu_dense = get_as_dense(n, "Generator", "p_min_pu")
+    #p_min_pu_dense = n.get_switchable_as_dense("Generator", "p_min_pu")
 
     # limit_up = ~ramp_up_dense.isnull().all()
     # limit_down = ~ramp_down_dense.isnull().all()
@@ -932,184 +937,96 @@ def check_folder(path):
         print(f"Folder '{path}' created.")
 
 
+# Legacy scenario workbooks name the same field differently. Renaming on load
+# keeps the scripts reading one vocabulary while older scenario sets stay valid.
+_SCENARIO_KEY_ALIASES = {
+    "co2_constraints": "carbon_constraints",
+    "extendable_techs": "extendable_active",
+}
+
+# Fields introduced after the legacy schema. Their absence in an older workbook
+# means the feature was not part of that study, so the "off" value is the
+# faithful reading rather than a guess. Anything not listed here stays missing
+# and fails loudly at its read site, because inventing a value for a physical
+# input (emissions, fuel price, weather year) would silently change results.
+_SCENARIO_DEFAULTS = {
+    "carbon_constraints": "none",
+    "carbon_tax": "none",
+    "unit_committment": False,
+    "variable_storage_vom": False,
+    "endogenous_coal_decom": False,
+    "dispatch_coal_flex": "SL_0",
+    "override_coal_msl": 0.0,
+    "coal_ramp_rate_multiplier": 1.0,
+    "phased_decom": "none",
+    "operational_reserves": "none",
+    "min_station_hourly": "none",
+    "global_discount_rate": 0.0,
+    "transmission_grid": "existing",
+}
+
+
 def load_scenario_setup(scenarios_file, scenario, include_run_only=True):
-    scenario_setup = (
-        pd.read_excel(
-            scenarios_file, 
-            sheet_name="scenario_definition",
-            index_col=[1])
-    )
+    raw = pd.read_excel(scenarios_file, sheet_name="scenario_definition")
+
+    # The scenario identifier is `scenario` in current workbooks and `wildcard`
+    # in the legacy ones. Reading it by position (index_col=[1]) consumed
+    # `run_scenario` in the old layout, which then vanished as a column.
+    id_col = next((c for c in ("scenario", "wildcard") if c in raw.columns), None)
+    if id_col is None:
+        raise KeyError(
+            f"{scenarios_file} has no scenario identifier column; expected "
+            f"'scenario' or 'wildcard', found {list(raw.columns)[:8]}"
+        )
+
+    scenario_setup = raw.set_index(id_col).rename(columns=_SCENARIO_KEY_ALIASES)
+
+    missing = [k for k in _SCENARIO_DEFAULTS if k not in scenario_setup.columns]
+    for k in missing:
+        scenario_setup[k] = _SCENARIO_DEFAULTS[k]
+    if missing:
+        logging.info(
+            "Scenario definition predates %d field(s); using their default "
+            "values: %s", len(missing), ", ".join(sorted(missing))
+        )
+
+    # `capacity_expansion_years` is the legacy name for the first year of the
+    # capacity horizon and appears in no shipped workbook; `build_topology`
+    # reads its first four characters. Derive it from the year list rather than
+    # defaulting to a constant, so it tracks whatever horizon the workbook sets.
+    if "capacity_expansion_years" not in scenario_setup.columns:
+        first_year = re.search(r"\d{4}", str(scenario_setup["simulation_years"].iloc[0]))
+        if first_year is None:
+            raise ValueError(
+                "Cannot derive `capacity_expansion_years`: no 4-digit year in "
+                f"simulation_years {scenario_setup['simulation_years'].iloc[0]!r}"
+            )
+        scenario_setup["capacity_expansion_years"] = first_year.group(0)
 
     if include_run_only:
         return (scenario_setup[scenario_setup.run_scenario.astype(bool)]).loc[scenario]
     else:
         return scenario_setup.loc[scenario]
 
-# Temp PyPSA fix ahead of master
 def single_year_network_copy(
     n,
     snapshots=None,
     investment_periods=None,
     ignore_standard_types=False,
 ):
+    """Return a deep copy of the network, optionally restricted to a subset of
+    snapshots and investment periods.
+
+    Thin wrapper over ``pypsa.Network.copy``, which grew the same arguments in
+    PyPSA 1.0. The hand-rolled version this replaces relied on
+    ``Network._retrieve_overridden_components``, which 1.0 removed.
     """
-    Returns a deep copy of the Network object with all components and time-
-    dependent data.
-
-    Returns
-    --------
-    network : pypsa.Network
-
-    Parameters
-    ----------
-    with_time : boolean, default True
-        Copy snapshots and time-varying network.component_names_t data too.
-    snapshots : list or index slice
-        A list of snapshots to copy, must be a subset of
-        network.snapshots, defaults to network.snapshots
-    ignore_standard_types : boolean, default False
-        Ignore the PyPSA standard types.
-
-    Examples
-    --------
-    >>> network_copy = network.copy()
-    """
-    (
-        override_components,
-        override_component_attrs,
-    ) = n._retrieve_overridden_components()
-
-    network = n.__class__(
+    return n.copy(
+        snapshots=snapshots,
+        investment_periods=investment_periods,
         ignore_standard_types=ignore_standard_types,
-        override_components=override_components,
-        override_component_attrs=override_component_attrs,
     )
 
-    other_comps = sorted(n.all_components - {"Bus", "Carrier"})
-    for component in n.iterate_components(["Bus", "Carrier"] + other_comps):
-        df = component.df
-        # drop the standard types to avoid them being read in twice
-        if (
-            not ignore_standard_types
-            and component.name in n.standard_type_components
-        ):
-            df = component.df.drop(
-                network.components[component.name]["standard_types"].index
-            )
-        if investment_periods is not None:
-            df = df.loc[n.get_active_assets(component.name, investment_periods)]
-        import_components_from_dataframe(network, df, component.name)
-
-    if snapshots is None:
-        snapshots = n.snapshots
-    if investment_periods is None:
-        investment_periods = n.investment_period_weightings.index
-    network.set_snapshots(snapshots)
-    if not investment_periods.empty:
-        network.set_investment_periods(investment_periods)
-    for component in n.iterate_components():
-        pnl = getattr(network, component.list_name + "_t")
-        for k in component.pnl.keys():
-            if component.name in ["Generator", "Link", "StorageUnit", "Store"]:
-                active = n.df(component.name)[n.get_active_assets(component.name, investment_periods)].index
-                active = component.pnl[k].columns.intersection(active)
-                pnl[k] = component.pnl[k].loc[snapshots,active].copy()
-            else:
-                pnl[k] = component.pnl[k].loc[snapshots].copy()
-    network.snapshot_weightings = n.snapshot_weightings.loc[snapshots].copy()
-    network.investment_period_weightings = (
-        n.investment_period_weightings.loc[investment_periods].copy()
-    )
-
-    # catch all remaining attributes of network
-    for attr in ["name", "srid"]:
-        setattr(network, attr, getattr(n, attr))
-
-    return network
-
-
-
-# Not needed once PyPSA main is updated
-def single_year_network_copy(
-    n,
-    snapshots=None,
-    investment_periods=None,
-    ignore_standard_types=False,
-):
-    """
-    Returns a deep copy of the Network object with all components and time-
-    dependent data.
-
-    Returns
-    --------
-    network : pypsa.Network
-
-    Parameters
-    ----------
-    with_time : boolean, default True
-        Copy snapshots and time-varying network.component_names_t data too.
-    snapshots : list or index slice
-        A list of snapshots to copy, must be a subset of
-        network.snapshots, defaults to network.snapshots
-    ignore_standard_types : boolean, default False
-        Ignore the PyPSA standard types.
-
-    Examples
-    --------
-    >>> network_copy = network.copy()
-    """
-    (
-        override_components,
-        override_component_attrs,
-    ) = n._retrieve_overridden_components()
-
-    network = n.__class__(
-        ignore_standard_types=ignore_standard_types,
-        override_components=override_components,
-        override_component_attrs=override_component_attrs,
-    )
-
-    other_comps = sorted(n.all_components - {"Bus", "Carrier"})
-    for component in n.iterate_components(["Bus", "Carrier"] + other_comps):
-        df = component.df
-        # drop the standard types to avoid them being read in twice
-        if (
-            not ignore_standard_types
-            and component.name in n.standard_type_components
-        ):
-            df = component.df.drop(
-                network.components[component.name]["standard_types"].index
-            )
-        if investment_periods is not None:
-            df = df.loc[n.get_active_assets(component.name, investment_periods)]
-        import_components_from_dataframe(network, df, component.name)
-
-    if snapshots is None:
-        snapshots = n.snapshots
-    if investment_periods is None:
-        investment_periods = n.investment_period_weightings.index
-    network.set_snapshots(snapshots)
-    if not investment_periods.empty:
-        network.set_investment_periods(investment_periods)
-    for component in n.iterate_components():
-        pnl = getattr(network, component.list_name + "_t")
-        for k in component.pnl.keys():
-            if component.name in ["Generator", "Link", "StorageUnit", "Store"]:
-                active = n.df(component.name)[n.get_active_assets(component.name, investment_periods)].index
-                active = component.pnl[k].columns.intersection(active)
-                pnl[k] = component.pnl[k].loc[snapshots,active].copy()
-            else:
-                pnl[k] = component.pnl[k].loc[snapshots].copy()
-    network.snapshot_weightings = n.snapshot_weightings.loc[snapshots].copy()
-    network.investment_period_weightings = (
-        n.investment_period_weightings.loc[investment_periods].copy()
-    )
-
-    # catch all remaining attributes of network
-    for attr in ["name", "srid"]:
-        setattr(network, attr, getattr(n, attr))
-
-    return network
 
 
 import numpy as np

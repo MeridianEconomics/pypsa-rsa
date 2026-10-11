@@ -59,7 +59,7 @@ from linopy import LinearExpression, Variable, merge
 import numpy as np
 import pandas as pd
 import pypsa
-from pypsa.descriptors import get_switchable_as_dense as get_as_dense, expand_series, get_activity_mask
+from pypsa.common import expand_series
 from pypsa.optimization.common import reindex
 
 from _helpers import configure_logging, remove_leap_day, normalize_and_rename_df, assign_segmented_df_to_network, load_scenario_definition
@@ -80,25 +80,28 @@ from xarray import DataArray
 """
 def set_extendable_limits_global(n):
 
-    ext_years = n.investment_periods if n.multi_invest else [n.snapshots[0].year]
+    ext_years = n.investment_periods if n.has_investment_periods else [n.snapshots[0].year]
     sense = {"max": "<=", "min": ">="}
     ignore = {"max": "unc", "min": 0}
 
     # Initialize an empty dictionary for global limits
     global_limits = {}
 
-    # Iterate over possible limits and try to read them from the Excel file
+    # Iterate over possible limits and try to read them from the Excel file.
+    # The index levels are (scenario, supply_region, component, location,
+    # carrier); selecting every location within the scenario's region is what
+    # makes the limit national rather than per-bus.
     for lim in ["max", "min"]:
         try:
             global_limit = pd.read_excel(
                 os.path.join(SCENARIO_SETUP["sub_path"], "extendable_technologies.xlsx"),
                 sheet_name=f'{lim}_total_installed',
                 index_col=[0, 1, 3, 2, 4],
-            ).loc[(SCENARIO_SETUP[f"extendable_{lim}_total"], "global", slice(None), slice(None)), ext_years]
+            ).loc[(SCENARIO_SETUP[f"extendable_{lim}_total"], SCENARIO_SETUP["regions"], slice(None), slice(None)), ext_years]
             # If successfully read, add to the global_limits dictionary
             global_limits[lim] = global_limit
-        except Exception:
-            logging.warning(f"No global {lim} limit found in model file. Skipping.")
+        except (KeyError, ValueError) as e:
+            logging.warning(f"No global {lim} limit found in model file. Skipping. ({e})")
 
     # Now global_limits only contains keys for successfully read sheets
     for lim, global_limit in global_limits.items():
@@ -110,7 +113,7 @@ def set_extendable_limits_global(n):
                 "carrier_attribute": carrier,
                 "sense": sense[lim],
                 "type": "tech_capacity_expansion_limit",
-                **({"investment_period": y} if n.multi_invest else {}),
+                **({"investment_period": y} if n.has_investment_periods else {}),
                 "constant": global_limit.loc[carrier, y],
             }
             for carrier in global_limit.index
@@ -125,7 +128,7 @@ def set_extendable_limits_global(n):
 
 
 def set_extendable_limits_per_bus(n):
-    ext_years = n.investment_periods if n.multi_invest else [n.snapshots[0].year]
+    ext_years = n.investment_periods if n.has_investment_periods else [n.snapshots[0].year]
     ignore = {"max": "unc", "min": 0}
 
     try:
@@ -137,23 +140,34 @@ def set_extendable_limits_per_bus(n):
             ).loc[(SCENARIO_SETUP[f"extendable_{lim}_total"], SCENARIO_SETUP["regions"], slice(None)), ext_years]
             for lim in ["max", "min"]
         }
-    except:
-        logging.warning("No regional extendable limits found in model file. Skipping.")
+    except (KeyError, ValueError) as e:
+        logging.warning(f"No regional extendable limits found in model file. Skipping. ({e})")
         return
 
     ext_carriers = (
         list(n.generators.carrier[n.generators.p_nom_extendable].unique())
         + list(n.storage_units.carrier[n.storage_units.p_nom_extendable].unique())
     )
+    # The workbook's location column names the model's supply regions; a row
+    # whose location is not a bus in this network has nowhere to land.
+    unmatched = set()
     for lim, bus_limit in bus_limits.items():
         bus_limit.index = bus_limit.index.droplevel([0, 1, 2])
+        unmatched |= set(bus_limit.index.get_level_values(0)) - set(n.buses.index)
         bus_limit = bus_limit.loc[~(bus_limit == ignore[lim]).all(axis=1)]
         bus_limit = bus_limit.loc[bus_limit.index.get_level_values(1).isin(ext_carriers)]
+        bus_limit = bus_limit.loc[bus_limit.index.get_level_values(0).isin(n.buses.index)]
 
         for idx in bus_limit.index:
             for y in ext_years:
                 if bus_limit.loc[idx, y] != ignore[lim]:
                     n.buses.loc[idx[0],f"nom_{lim}_{idx[1]}_{y}"] = bus_limit.loc[idx, y]
+
+    if unmatched:
+        logging.warning(
+            f"{len(unmatched)} location(s) in extendable_technologies.xlsx do not "
+            f"match a bus in the network and were skipped: {sorted(unmatched)}"
+        )
 
 
 """
@@ -246,7 +260,7 @@ def add_coal_decom(n, start_limits, full_outages_pu_max):
     # Create a retirement variable index
     gen_retire_list=[]
     for y in n.investment_periods:
-        active = n.get_active_assets("Generator", y)
+        active = n.components["Generator"].get_active_assets(y)
         gens_i = [g for g in gens_df if g in active[active]]
         for g in gens_i:
             gen_retire_list.append(f"{g}_{y}")
@@ -264,7 +278,7 @@ def add_coal_decom(n, start_limits, full_outages_pu_max):
 
 
     for y in n.investment_periods:
-        active = n.get_active_assets("Generator", y) # Only take assets that have not yet reached end of life
+        active = n.components["Generator"].get_active_assets(y) # Only take assets that have not yet reached end of life
 
         gens_i = [g for g in gens_df if g in active[active]] # only apply constraints if station is active
         for gen in gens_i:
@@ -368,7 +382,7 @@ def set_operating_reserves(n, sns, SCENARIO_SETUP):
     
     status = n.model.variables["Generator-status"].rename({"Generator-com":"Generator"})
 
-    active = get_activity_mask(n, "Generator", sns, gens_i)
+    active = n.components["Generator"].get_activity_mask(sns, gens_i)
     active.index.name="snapshot"
     
     p_nom_fix = DataArray(n.generators.loc[fix_i, "p_nom"] * active[fix_i])
@@ -400,7 +414,7 @@ def set_operating_reserves(n, sns, SCENARIO_SETUP):
     fix_i = n.storage_units.query("p_nom_extendable == False").index
     ext_i = n.storage_units.query("p_nom_extendable == True").index
     st_i = n.storage_units.index
-    active = get_activity_mask(n, "StorageUnit", sns, st_i)
+    active = n.components["StorageUnit"].get_activity_mask(sns, st_i)
     active.index.name="snapshot"
 
     p_nom_st_fix = DataArray(n.storage_units.loc[fix_i, "p_nom"]) * DataArray(active[fix_i])
@@ -446,7 +460,7 @@ def set_operating_reserves(n, sns, SCENARIO_SETUP):
 
 def solve_network(n, sns, full_outages_pu_max):
 
-    n.optimize.create_model(snapshots = sns, multi_investment_periods = n.multi_invest, linearized_unit_commitment = True)    
+    n.optimize.create_model(snapshots = sns, multi_investment_periods = n.has_investment_periods, linearized_unit_commitment = True)    
 
     set_operational_limits(n, sns, SCENARIO_SETUP, snakemake)
     ccgt_steam_constraints(n, sns, SCENARIO_SETUP, snakemake)
@@ -457,8 +471,8 @@ def solve_network(n, sns, full_outages_pu_max):
         add_coal_decom(n, start_limits, full_outages_pu_max)
         param = load_extendable_parameters(n, SCENARIO_SETUP, snakemake)
         if SCENARIO_SETUP["carbon_constraints"] not in ["None", "none", "", "-"]:
-            gen_emissions = pd.read_csv(snakemake.input["generator_emissioans"],index_col=[0])
-            add_annual_co2_constraints(n, sns, param, SCENARIO_SETUP, gen_emissions)
+            gen_emissions = pd.read_csv(snakemake.input["generator_emissions"],index_col=[0])
+            add_annual_co2_constraints(n, sns, SCENARIO_SETUP, gen_emissions)
 
 
     reserve_margin_constraints(n, sns, SCENARIO_SETUP, snakemake)
@@ -512,14 +526,31 @@ if __name__ == "__main__":
 
     n = pypsa.Network(snakemake.input[0])
 
-    n.generators.ramp_limit_start_up = 0.65
-
-    n.generators.ramp_limit_shut_down = 0.65   
+    # ramp_limit_start_up / ramp_limit_shut_down are per-station inputs in
+    # fixed_technologies.xlsx and extendable_technologies.xlsx; overwriting the
+    # whole fleet here discards them.
 
     SCENARIO_SETUP = load_scenario_definition(snakemake.wildcards.scenario, snakemake.config)
 
-    SOLVER_NAME = snakemake.config["solver"][SCENARIO_SETUP["solver"]].pop("name")
-    SOLVER_OPTIONS = snakemake.config["solver"][SCENARIO_SETUP["solver"]].copy()
+    # A scenario definition may name its own solver, or leave the choice to
+    # config["solver"]["default"] when the column is absent or blank. Either way
+    # the value is a key into the solver block, so a misspelling fails here with
+    # the list of valid names rather than deep inside linopy.
+    solver_key = SCENARIO_SETUP.get("solver")
+    if solver_key is None or str(solver_key).strip().lower() in ("none", "nan", ""):
+        solver_key = snakemake.config["solver"]["default"]
+    if solver_key not in snakemake.config["solver"]:
+        available = sorted(
+            k for k, v in snakemake.config["solver"].items()
+            if isinstance(v, dict) and "name" in v
+        )
+        raise KeyError(
+            f"Scenario {snakemake.wildcards.scenario!r} asks for solver "
+            f"{solver_key!r}, which is not defined under `solver` in config.yaml. "
+            f"Available: {available}"
+        )
+    SOLVER_NAME = snakemake.config["solver"][solver_key].pop("name")
+    SOLVER_OPTIONS = snakemake.config["solver"][solver_key].copy()
 
 
     logging.info("Setting global and regional build limits")

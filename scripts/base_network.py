@@ -140,12 +140,12 @@ def line_derating(n, lines):
     return pu_max
 
 def add_components_to_network(n, buses, lines, line_config):
-    n.import_components_from_dataframe(buses, "Bus")
+    n._import_components_from_df(buses, "Bus")
 #   Only a transfer model is used, with allowable efficiency losses
 #   This requires two uni-directional links between nodes as PyPSA efficiency is not bi-directional
     if len(buses) != 1:
         pu_max = line_derating(n, lines)
-        n.madd(
+        n.add(
             "Link",
             lines.index,
             p_nom = lines["St_Clair_limit_n1"],
@@ -198,7 +198,6 @@ if __name__ == "__main__":
 
 
     n = build_base_network(years, buses, lines, line_config)
-    n.multi_invest = 1 if not isinstance(years, int) else 0
     n.export_to_netcdf(snakemake.output[0])
 
 

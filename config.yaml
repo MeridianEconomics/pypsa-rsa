@@ -195,8 +195,26 @@ tsam_clustering:
   solver: "cbc" #need to use open source solver here due to parallel processing of years
  
 solver:
-  options:
-    clip_p_max_pu: 1.e-2
+  # Fallback for scenario definitions that carry no `solver` column. The value
+  # is a key into this block, so a new scenario set can run on an open-source
+  # solver without editing its workbook.
+  default: highs
+  # Open-source solvers. HiGHS runs in-process via highspy and needs no binary;
+  # cbc, glpk and scip are command-line solvers, so the executable must be on
+  # PATH (linopy looks for `cbc`, `glpsol` and `scip` respectively). `name` is
+  # what linopy resolves, and every other key is forwarded verbatim as a solver
+  # option -- as `-key value` for cbc and `--key value` for glpk.
+  cbc:
+    name: cbc
+    # CBC 2.10 is serial; there is no threads option.
+    ratioGap: 1.e-4
+  glpk:
+    name: glpk
+  scip:
+    name: scip
+    #threads: 4
+    limits/gap: 1.e-4
+
   copt:
     name: copt
     LpMethod: 2

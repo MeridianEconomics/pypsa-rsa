@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
 import pypsa
-from pypsa.descriptors import get_switchable_as_dense as get_as_dense, expand_series, get_activity_mask
+from pypsa.common import expand_series
 from pypsa.optimization.common import reindex
 import os
 
@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 
 def calc_max_gen_potential(n, sns, gens, incl_pu, weightings, active, cf_limit, extendable=False):
     suffix = "" if extendable == False else "-ext"
-    p_max_pu = get_as_dense(n, 'Generator', "p_max_pu", sns)[gens] if incl_pu else pd.DataFrame(1, index=sns, columns=gens)
+    p_max_pu = n.get_switchable_as_dense('Generator', "p_max_pu", sns)[gens] if incl_pu else pd.DataFrame(1, index=sns, columns=gens)
     p_max_pu.columns.name = f'Generator{suffix}'
     
-    if n.multi_invest:
+    if n.has_investment_periods:
         cf_limit_h = pd.DataFrame(0, index=sns, columns=gens)
         for y in cf_limit_h.index.get_level_values(0).unique():
             cf_limit_h.loc[y] = cf_limit[y]
@@ -64,7 +64,7 @@ def apply_operational_constraints(n, sns, **kwargs):
 
     sense = "<=" if limit == "max" else ">="
 
-    if len(sns) <8760 and not n.multi_invest and period in ["week", "month"]: #conditions for rolling horizon analysis monthly
+    if len(sns) <8760 and not n.has_investment_periods and period in ["week", "month"]: #conditions for rolling horizon analysis monthly
         sns = sns[sns.month == sns.month[0]] # ignore overlap with next month for monthly limits
 
     cf_limit = 0 * kwargs["values"] if type_ == "energy_power" else kwargs["values"]
@@ -73,7 +73,7 @@ def apply_operational_constraints(n, sns, **kwargs):
     if ((kwargs["type"] in ["primary_energy", "output_energy"]) & (kwargs["units"] != "MWh")) or ((kwargs["type"] == "output_power") & (kwargs["units"] != "MW")):
         en_pow_limit *= energy_unit_conversion[kwargs["units"]]
 
-    years = get_investment_periods(sns, n.multi_invest)
+    years = get_investment_periods(sns, n.has_investment_periods)
 
     filtered_gens = n.generators.query("carrier in @carrier") if len(carrier)>1 else n.generators.query("carrier == @carrier")
     if bus != "global":
@@ -85,16 +85,16 @@ def apply_operational_constraints(n, sns, **kwargs):
     if len(filtered_gens) == 0:
         return
 
-    efficiency = get_as_dense(n, "Generator", "efficiency", inds=filtered_gens.index) if kwargs["type"] == "primary_energy" else pd.DataFrame(1, index=n.snapshots, columns = filtered_gens.index)
+    efficiency = n.get_switchable_as_dense("Generator", "efficiency", inds=filtered_gens.index) if kwargs["type"] == "primary_energy" else pd.DataFrame(1, index=n.snapshots, columns = filtered_gens.index)
     weightings = (1/efficiency).multiply(n.snapshot_weightings.generators, axis=0)
 
     # if only extendable generators only select snapshots where generators are active
     min_year = n.generators.loc[filtered_gens.index, "build_year"].min()
-    sns_active = sns[sns.get_level_values(0) >= min_year] if n.multi_invest else sns[sns.year >= min_year]
+    sns_active = sns[sns.get_level_values(0) >= min_year] if n.has_investment_periods else sns[sns.year >= min_year]
     act_gen = (n.model.variables['Generator-p'].loc[sns_active, filtered_gens.index] * weightings.loc[sns_active]).sel(Generator=filtered_gens.index).sum('Generator')
     act_gen_pow = (n.model.variables['Generator-p'].loc[sns_active, filtered_gens.index]).sel(Generator=filtered_gens.index).sum('Generator')
 
-    timestep = "timestep" if n.multi_invest else "snapshot"
+    timestep = "timestep" if n.has_investment_periods else "snapshot"
     groupby_dict = {
         "year": f"{timestep}.year",
         "month": f"{timestep}.month",
@@ -102,14 +102,14 @@ def apply_operational_constraints(n, sns, **kwargs):
         "hour": None
     }
 
-    active = get_activity_mask(n, "Generator", sns).astype(int)
+    active = n.components["Generator"].get_activity_mask(sns).astype(int)
     if type_ != "energy_power":
         max_gen_fix = calc_max_gen_potential(n, sns, fix_i, incl_pu, weightings, active, cf_limit, extendable=False) if len(fix_i)>0 else 0
         max_gen_ext = calc_max_gen_potential(n, sns, ext_i, incl_pu, weightings, active, cf_limit, extendable=True) if len(ext_i)>0 else 0
 
     if groupby := groupby_dict[period]:
         for y in years:
-            year_sns = sns_active[sns_active.get_level_values(0)==y] if n.multi_invest else sns_active
+            year_sns = sns_active[sns_active.get_level_values(0)==y] if n.has_investment_periods else sns_active
             if len(year_sns) > 0:
                 if type_ == "capacity_factor":
                     lhs = (act_gen - max_gen_ext) 
@@ -117,7 +117,7 @@ def apply_operational_constraints(n, sns, **kwargs):
                         rhs = max_gen_fix
                         skip_constraint = 0 if rhs >=0 else 1
                     else:
-                        rhs = max_gen_fix.loc[y] if n.multi_invest else max_gen_fix.loc[year_sns]
+                        rhs = max_gen_fix.loc[y] if n.has_investment_periods else max_gen_fix.loc[year_sns]
                         skip_constraint = 0 if (rhs >=0).any().any() else 1
                 else:
                     lhs = act_gen
@@ -149,7 +149,7 @@ def apply_operational_constraints(n, sns, **kwargs):
 
         else:
             rhs = pd.Series(index = sns)
-            if n.multi_invest:
+            if n.has_investment_periods:
                 for y in years:
                     rhs.loc[y] = en_pow_limit[y]
             else:
@@ -197,7 +197,7 @@ def ccgt_steam_constraints(n, sns, scenario_setup, snakemake):
             index_col=[0,1,2],
     ).loc[scenario_setup["aux_stg_feed"]]
 
-    years = n.investment_periods if n.multi_invest else [n.snapshots[0].year]
+    years = n.investment_periods if n.has_investment_periods else [n.snapshots[0].year]
     
     for bus in n.buses.index:
         for y in years:
@@ -215,7 +215,7 @@ def ccgt_steam_constraints(n, sns, scenario_setup, snakemake):
 
             if len(n.investment_periods) > 0:
                 sns_y = sns[sns.get_level_values(0)==y]
-                ccgt_hrsg = n.generators[n.get_active_assets("Generator",y)].query("bus == bus & carrier == 'ccgt_steam'").index
+                ccgt_hrsg = n.generators[n.components["Generator"].get_active_assets(y)].query("bus == bus & carrier == 'ccgt_steam'").index
             else:
                 sns_y = sns
                 ccgt_hrsg = n.generators.query("bus == bus & carrier == 'ccgt_steam'").index
@@ -250,7 +250,7 @@ def limit_coal_start_ups_capacity(n, sns, limit, full_outages_pu_max):
 ********************************************************************************
 """
 def check_active(n, c, y, list):
-    active = n.df(c).index[n.get_active_assets(c, y)] if n.multi_invest else list
+    active = n.df(c).index[n.components[c].get_active_assets(y)] if n.has_investment_periods else list
     return list.intersection(active)
 
 def reserve_margin_constraints(n, sns, scenario_setup, snakemake):
@@ -276,8 +276,8 @@ def reserve_margin_constraints(n, sns, scenario_setup, snakemake):
     res_mrgn_active = res_margin.loc["reserve_margin_active"]
     res_mrgn = res_margin.loc["reserve_margin"]
 
-    peak = n.loads_t.p_set.loc[sns].sum(axis=1).groupby(sns.get_level_values(0)).max() if n.multi_invest else n.loads_t.p_set.loc[sns].sum(axis=1).max()
-    peak = peak if n.multi_invest else pd.Series(peak, index = sns.year.unique())
+    peak = n.loads_t.p_set.loc[sns].sum(axis=1).groupby(sns.get_level_values(0)).max() if n.has_investment_periods else n.loads_t.p_set.loc[sns].sum(axis=1).max()
+    peak = peak if n.has_investment_periods else pd.Series(peak, index = sns.year.unique())
     #capacity_credit = snakemake.config["electricity"]["reserves"]["capacity_credit"]
 
     for y in peak.index:
@@ -329,11 +329,16 @@ def add_annual_co2_constraints(n, sns, scenario_setup, gen_emissions):
         sheet_name="annual_carbon_constraint",
         index_col=[0]).loc[scenario_setup["carbon_constraints"]]
 
-    conv = 1
-    if annual_limits.unit.split("/")[0] == "Mt":
+    unit = annual_limits.units.split("/")[0]
+    if unit == "Mt":
         conv = 1e9 # convert to kgCO2
-    elif annual_limits.units.split("/")[0] == "Gt":
+    elif unit == "Gt":
         conv = 1e12 # convert to kgCO2
+    else:
+        raise ValueError(
+            f"Unsupported unit '{annual_limits.units}' in emissions.xlsx "
+            "'annual_carbon_constraint'; expected Mt/yr or Gt/yr."
+        )
 
     gen_p = n.model.variables['Generator-p']
     gen_p = gen_p.sel(Generator = gen_emissions.index)

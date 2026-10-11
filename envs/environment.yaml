@@ -21,18 +21,18 @@ dependencies:
   - memory_profiler
   - netcdf4
   - networkx
-  - numpy=1.26.*
+  - numpy=2.4.*
   - openpyxl!=3.1.1
-  - pandas=2.2.*
+  - pandas=3.0.*
   - pip
   - powerplantmatching[version='>=0.5.15']
   - pre-commit
   - proj
   - pycountry
-  - pypsa=0.35.2
+  - pypsa=1.4.*
   - pyscipopt
   - pytables
-  - python[version='>=3.8']
+  - python[version='>=3.11,<3.13']
   - pytz
   - pyxlsb
   - rasterio!=1.2.10
@@ -47,4 +47,4 @@ dependencies:
   - xlrd
   - yaml
   - ipykernel
-  - tsam
+  - tsam=3.4.2

@@ -1422,21 +1422,24 @@ def check_pu_profiles(n, clean_flag):
             ramp_limit_start_up = n.generators.ramp_limit_start_up
             ramp_limit_shut_down = n.generators.ramp_limit_shut_down
 
+        # ramp_limit_start_up and ramp_limit_shut_down are static floats that
+        # PyPSA reads from n.generators, so the repair has to land there. The
+        # dense frame is collapsed over snapshots to the worst hour.
         errors = ramp_limit_start_up < p_min_pu
         error_lst = errors.any()
         if errors.any().any() and clean_flag:
             logging.info(f"Adjusting by start_up limits to match min_stable_level to avoid infeasibilities for the following generators {list(error_lst[error_lst].index)}")
             try:
-                n.generators_t.ramp_limit_start_up = ramp_limit_start_up.where(~errors, p_min_pu)
+                n.generators.ramp_limit_start_up = ramp_limit_start_up.where(~errors, p_min_pu).max()
             except:
                 n.generators.ramp_limit_start_up = p_min_pu.max()
 
-        errors = ramp_limit_start_up < p_min_pu
+        errors = ramp_limit_shut_down < p_min_pu
         error_lst = errors.any()
         if errors.any().any() and clean_flag:
             logging.info(f"Adjusting by shut_down limits to match min_stable_level to avoid infeasibilities for the following generators {list(error_lst[error_lst].index)}")
             try:
-                n.generators_t.ramp_limit_shut_down = ramp_limit_shut_down.where(~errors, p_min_pu)
+                n.generators.ramp_limit_shut_down = ramp_limit_shut_down.where(~errors, p_min_pu).max()
             except:
                 n.generators.ramp_limit_shut_down = p_min_pu.max()
 
@@ -1455,7 +1458,7 @@ def check_pu_profiles(n, clean_flag):
     if errors.any().any() and clean_flag:
         logging.info(f"Adjusting minimum ramp down limits to 5% to avoid infeasibilities for the following generators {list(error_lst[error_lst].index)}")
         try:
-            n.generators_t.ramp_limit_shut_down = ramp_limit_down.where(~errors, 0.05)
+            n.generators_t.ramp_limit_down = ramp_limit_down.where(~errors, 0.05)
         except:
             pass
 

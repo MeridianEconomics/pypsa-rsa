@@ -98,6 +98,7 @@ Documentation
 **Help and References**
 
 * :doc:`release_notes`
+* :doc:`known_issues`
 * :doc:`how_to_contribute`
 
 .. toctree::
@@ -106,4 +107,5 @@ Documentation
    :caption: Project Info
 
    release_notes
+   known_issues
    how_to_contribute

@@ -2,7 +2,9 @@
 # # SPDX-License-Identifier: MIT
 # -*- coding: utf-8 -*-
 
+import logging
 import os
+import re
 from pathlib import Path
 
 import geopandas as gpd
@@ -763,10 +765,14 @@ def drop_non_pypsa_attrs(n, c, df):
 
 def normalize_and_rename_df(df, snapshots, fillna, suffix=None):
     df = df.loc[snapshots]
-    df = (df / df.max()).fillna(fillna)
+    # Capture the maxima before dividing, and rename them alongside the columns
+    # so the caller can de-normalise a frame whose columns carry the suffix.
+    maxima = df.max()
+    df = (df / maxima).fillna(fillna)
     if suffix:
         df.columns += f'_{suffix}'
-    return df, df.max()
+        maxima.index += f'_{suffix}'
+    return df, maxima
 
 def find_string_entries(series):
     return series[series.apply(lambda x: isinstance(x, str))]#.index
@@ -776,9 +782,11 @@ def find_non_string_entries(series):
 
 def assign_segmented_df_to_network(df, search_str, replace_str, target):
     cols = df.columns[df.columns.str.contains(search_str)]
-    segmented = df[cols]
+    segmented = df[cols].copy()
     segmented.columns = segmented.columns.str.replace(search_str, replace_str)
-    target = segmented
+    # Write into the caller's frame in place; rebinding the name here would
+    # leave the network untouched.
+    target[segmented.columns] = segmented
 
 
 def get_start_year(sns, multi_invest):
@@ -932,13 +940,71 @@ def check_folder(path):
         print(f"Folder '{path}' created.")
 
 
+# Legacy scenario workbooks name the same field differently. Renaming on load
+# keeps the scripts reading one vocabulary while older scenario sets stay valid.
+_SCENARIO_KEY_ALIASES = {
+    "co2_constraints": "carbon_constraints",
+    "extendable_techs": "extendable_active",
+}
+
+# Fields introduced after the legacy schema. Their absence in an older workbook
+# means the feature was not part of that study, so the "off" value is the
+# faithful reading rather than a guess. Anything not listed here stays missing
+# and fails loudly at its read site, because inventing a value for a physical
+# input (emissions, fuel price, weather year) would silently change results.
+_SCENARIO_DEFAULTS = {
+    "carbon_constraints": "none",
+    "carbon_tax": "none",
+    "unit_committment": False,
+    "variable_storage_vom": False,
+    "endogenous_coal_decom": False,
+    "dispatch_coal_flex": "SL_0",
+    "override_coal_msl": 0.0,
+    "coal_ramp_rate_multiplier": 1.0,
+    "phased_decom": "none",
+    "operational_reserves": "none",
+    "min_station_hourly": "none",
+    "global_discount_rate": 0.0,
+    "transmission_grid": "existing",
+}
+
+
 def load_scenario_setup(scenarios_file, scenario, include_run_only=True):
-    scenario_setup = (
-        pd.read_excel(
-            scenarios_file, 
-            sheet_name="scenario_definition",
-            index_col=[1])
-    )
+    raw = pd.read_excel(scenarios_file, sheet_name="scenario_definition")
+
+    # The scenario identifier is `scenario` in current workbooks and `wildcard`
+    # in the legacy ones. Reading it by position (index_col=[1]) consumed
+    # `run_scenario` in the old layout, which then vanished as a column.
+    id_col = next((c for c in ("scenario", "wildcard") if c in raw.columns), None)
+    if id_col is None:
+        raise KeyError(
+            f"{scenarios_file} has no scenario identifier column; expected "
+            f"'scenario' or 'wildcard', found {list(raw.columns)[:8]}"
+        )
+
+    scenario_setup = raw.set_index(id_col).rename(columns=_SCENARIO_KEY_ALIASES)
+
+    missing = [k for k in _SCENARIO_DEFAULTS if k not in scenario_setup.columns]
+    for k in missing:
+        scenario_setup[k] = _SCENARIO_DEFAULTS[k]
+    if missing:
+        logging.info(
+            "Scenario definition predates %d field(s); using their default "
+            "values: %s", len(missing), ", ".join(sorted(missing))
+        )
+
+    # `capacity_expansion_years` is the legacy name for the first year of the
+    # capacity horizon and appears in no shipped workbook; `build_topology`
+    # reads its first four characters. Derive it from the year list rather than
+    # defaulting to a constant, so it tracks whatever horizon the workbook sets.
+    if "capacity_expansion_years" not in scenario_setup.columns:
+        first_year = re.search(r"\d{4}", str(scenario_setup["simulation_years"].iloc[0]))
+        if first_year is None:
+            raise ValueError(
+                "Cannot derive `capacity_expansion_years`: no 4-digit year in "
+                f"simulation_years {scenario_setup['simulation_years'].iloc[0]!r}"
+            )
+        scenario_setup["capacity_expansion_years"] = first_year.group(0)
 
     if include_run_only:
         return (scenario_setup[scenario_setup.run_scenario.astype(bool)]).loc[scenario]

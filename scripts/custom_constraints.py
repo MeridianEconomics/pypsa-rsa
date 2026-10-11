@@ -329,11 +329,16 @@ def add_annual_co2_constraints(n, sns, scenario_setup, gen_emissions):
         sheet_name="annual_carbon_constraint",
         index_col=[0]).loc[scenario_setup["carbon_constraints"]]
 
-    conv = 1
-    if annual_limits.unit.split("/")[0] == "Mt":
+    unit = annual_limits.units.split("/")[0]
+    if unit == "Mt":
         conv = 1e9 # convert to kgCO2
-    elif annual_limits.units.split("/")[0] == "Gt":
+    elif unit == "Gt":
         conv = 1e12 # convert to kgCO2
+    else:
+        raise ValueError(
+            f"Unsupported unit '{annual_limits.units}' in emissions.xlsx "
+            "'annual_carbon_constraint'; expected Mt/yr or Gt/yr."
+        )
 
     gen_p = n.model.variables['Generator-p']
     gen_p = gen_p.sel(Generator = gen_emissions.index)
